@@ -4,6 +4,11 @@ var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
 module.exports = function(defaults) {
   var app = new EmberApp(defaults, {
+    modulePrefix: "app",
+    podModulePrefix: "pods",
+    environment: environment,
+    baseURL: '/',
+    locationType: 'auto'
     // Add options here
   });
 
