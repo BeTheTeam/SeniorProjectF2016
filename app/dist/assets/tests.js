@@ -117,18 +117,6 @@ define('senior-project/tests/helpers/start-app.jshint', ['exports'], function (e
     });
   });
 });
-define('senior-project/tests/pods/event/route.jshint', ['exports'], function (exports) {
-  'use strict';
-
-  describe('JSHint | pods/event/route.js', function () {
-    it('should pass jshint', function () {
-      if (!false) {
-        var error = new chai.AssertionError('pods/event/route.js should pass jshint.\npods/event/route.js: line 1, col 27, Unnecessary semicolon.\npods/event/route.js: line 10, col 27, Unnecessary semicolon.\n\n2 errors');
-        error.stack = undefined;throw error;
-      }
-    });
-  });
-});
 define('senior-project/tests/resolver.jshint', ['exports'], function (exports) {
   'use strict';
 
