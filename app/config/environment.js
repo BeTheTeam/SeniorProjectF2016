@@ -2,9 +2,10 @@
 
 module.exports = function(environment) {
   var ENV = {
-    modulePrefix: 'betheteam',
+    modulePrefix: 'senior-project',
+    podModulePrefix: 'senior-project/pods',
     environment: environment,
-    rootURL: '/',
+    baseURL: '/',
     locationType: 'auto',
     EmberENV: {
       FEATURES: {
@@ -29,6 +30,7 @@ module.exports = function(environment) {
 
   if (environment === 'test') {
     // Testem prefers this...
+    ENV.baseURL = '/';
     ENV.locationType = 'none';
 
     // keep test console output quieter
