@@ -3,9 +3,9 @@
 ## Functional Requirements
 
 ###Create Users
-    - Create user as player
-    - Create user as coach
-    - Create user as organizer
+- Create user as player
+- Create user as coach
+- Create user as organizer
 
 ### Player 
 - Input personal information
