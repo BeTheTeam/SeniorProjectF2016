@@ -117,6 +117,106 @@ define('senior-project/tests/helpers/start-app.jshint', ['exports'], function (e
     });
   });
 });
+define("senior-project/tests/integration/event/event-test", ["exports", "senior-project/tests/pages/event"], function (exports, _seniorProjectTestsPagesEvent) {
+  describe("Integration: EventPage", function () {
+    before(function () {
+      return this.page = _seniorProjectTestsPagesEvent["default"];
+    });
+    beforeEach(function () {
+      return this.page.visit();
+    });
+    return describe("adding players", function () {
+      return it("can add a new player, and clears the text input", function () {
+        expect(this.page.numPlayers).to.equal(3);
+        this.page.setPlayerName('Derp');
+        return expect(this.page.numPlayers).to.equal(4);
+      });
+    });
+  });
+});
+define('senior-project/tests/page-object', ['exports', 'ember-cli-page-object'], function (exports, _emberCliPageObject) {
+  exports.attribute = _emberCliPageObject.attribute;
+  exports.clickOnText = _emberCliPageObject.clickOnText;
+  exports.clickable = _emberCliPageObject.clickable;
+  exports.collection = _emberCliPageObject.collection;
+  exports.contains = _emberCliPageObject.contains;
+  exports.count = _emberCliPageObject.count;
+  exports.create = _emberCliPageObject.create;
+  exports.fillable = _emberCliPageObject.fillable;
+  exports.selectable = _emberCliPageObject.fillable;
+  exports.hasClass = _emberCliPageObject.hasClass;
+  exports.is = _emberCliPageObject.is;
+  exports.isHidden = _emberCliPageObject.isHidden;
+  exports.isVisible = _emberCliPageObject.isVisible;
+  exports.notHasClass = _emberCliPageObject.notHasClass;
+  exports.property = _emberCliPageObject.property;
+  exports.text = _emberCliPageObject.text;
+  exports.triggerable = _emberCliPageObject.triggerable;
+  exports.value = _emberCliPageObject.value;
+  exports.visitable = _emberCliPageObject.visitable;
+  exports['default'] = {
+    attribute: _emberCliPageObject.attribute,
+    clickOnText: _emberCliPageObject.clickOnText,
+    clickable: _emberCliPageObject.clickable,
+    collection: _emberCliPageObject.collection,
+    contains: _emberCliPageObject.contains,
+    count: _emberCliPageObject.count,
+    create: _emberCliPageObject.create,
+    fillable: _emberCliPageObject.fillable,
+    hasClass: _emberCliPageObject.hasClass,
+    is: _emberCliPageObject.is,
+    isHidden: _emberCliPageObject.isHidden,
+    isVisible: _emberCliPageObject.isVisible,
+    notHasClass: _emberCliPageObject.notHasClass,
+    property: _emberCliPageObject.property,
+    selectable: _emberCliPageObject.fillable,
+    text: _emberCliPageObject.text,
+    triggerable: _emberCliPageObject.triggerable,
+    value: _emberCliPageObject.value,
+    visitable: _emberCliPageObject.visitable
+  };
+  Object.defineProperty(exports, 'buildSelector', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObject.buildSelector;
+    }
+  });
+  Object.defineProperty(exports, 'findElementWithAssert', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObject.findElementWithAssert;
+    }
+  });
+  Object.defineProperty(exports, 'findElement', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObject.findElement;
+    }
+  });
+  Object.defineProperty(exports, 'getContext', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObject.getContext;
+    }
+  });
+});
+define('senior-project/tests/pages/event', ['exports', 'ember-cli-page-object'], function (exports, _emberCliPageObject) {
+  var EventPage, clickable, collection, count, fillable, isHidden, visitable;
+
+  collection = _emberCliPageObject['default'].collection, visitable = _emberCliPageObject['default'].visitable, clickable = _emberCliPageObject['default'].clickable, isHidden = _emberCliPageObject['default'].isHidden, count = _emberCliPageObject['default'].count, fillable = _emberCliPageObject['default'].fillable;
+
+  EventPage = _emberCliPageObject['default'].create({
+    visit: visitable('/event'),
+    addPlayer: clickable('.player-add'),
+    setPlayerName: fillable('.player-name-input'),
+    numPlayers: count('.players'),
+    players: collection({
+      itemScope: '.players'
+    })
+  });
+
+  exports['default'] = EventPage;
+});
 define('senior-project/tests/resolver.jshint', ['exports'], function (exports) {
   'use strict';
 
@@ -129,21 +229,14 @@ define('senior-project/tests/resolver.jshint', ['exports'], function (exports) {
     });
   });
 });
-define('senior-project/tests/test-helper', ['exports', 'senior-project/tests/helpers/resolver', 'ember-mocha'], function (exports, _seniorProjectTestsHelpersResolver, _emberMocha) {
+define('senior-project/tests/test-helper', ['exports', 'senior-project/tests/helpers/resolver', 'ember-mocha', 'senior-project/tests/helpers/start-app', 'ember'], function (exports, _seniorProjectTestsHelpersResolver, _emberMocha, _seniorProjectTestsHelpersStartApp, _ember) {
+  var Em;
+
+  Em = _ember['default'];
+
+  (0, _seniorProjectTestsHelpersStartApp['default'])();
 
   (0, _emberMocha.setResolver)(_seniorProjectTestsHelpersResolver['default']);
-});
-define('senior-project/tests/test-helper.jshint', ['exports'], function (exports) {
-  'use strict';
-
-  describe('JSHint | test-helper.js', function () {
-    it('should pass jshint', function () {
-      if (!true) {
-        var error = new chai.AssertionError('test-helper.js should pass jshint.');
-        error.stack = undefined;throw error;
-      }
-    });
-  });
 });
 define('senior-project/tests/unit/controllers/event-test', ['exports', 'chai', 'ember-mocha'], function (exports, _chai, _emberMocha) {
 

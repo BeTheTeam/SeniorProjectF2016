@@ -22,6 +22,30 @@ define('senior-project/app', ['exports', 'ember', 'senior-project/resolver', 'em
 
   exports['default'] = App;
 });
+define('senior-project/blueprints/page-object-component', ['exports', 'ember-cli-page-object/blueprints/page-object-component'], function (exports, _emberCliPageObjectBlueprintsPageObjectComponent) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectBlueprintsPageObjectComponent['default'];
+    }
+  });
+});
+define('senior-project/blueprints/page-object-helper', ['exports', 'ember-cli-page-object/blueprints/page-object-helper'], function (exports, _emberCliPageObjectBlueprintsPageObjectHelper) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectBlueprintsPageObjectHelper['default'];
+    }
+  });
+});
+define('senior-project/blueprints/page-object', ['exports', 'ember-cli-page-object/blueprints/page-object'], function (exports, _emberCliPageObjectBlueprintsPageObject) {
+  Object.defineProperty(exports, 'default', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectBlueprintsPageObject['default'];
+    }
+  });
+});
 define('senior-project/components/app-version', ['exports', 'ember-cli-app-version/components/app-version', 'senior-project/config/environment'], function (exports, _emberCliAppVersionComponentsAppVersion, _seniorProjectConfigEnvironment) {
 
   var name = _seniorProjectConfigEnvironment['default'].APP.name;
@@ -431,7 +455,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+fc1ab40b"});
+  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+4256109c"});
 }
 
 /* jshint ignore:end */

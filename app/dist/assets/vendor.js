@@ -66730,6 +66730,245 @@ requireModule("ember");
   generateModule('rsvp', { 'default': Ember.RSVP });
 })();
 
+;!function() {
+  function merge() {
+    var target = arguments[0];
+    var sources = Array.prototype.slice.call(arguments, 1);
+    var source;
+
+    for(var i = 0; i < sources.length; i++) {
+      source = sources[i];
+
+      if (!source) {
+        continue;
+      }
+
+      for(var attr in source) {
+        if (typeof source[attr] !== 'undefined') {
+          target[attr] = source[attr];
+        }
+      }
+    }
+
+    return target;
+  }
+
+  /**
+   * Extends typeof to add the type 'descriptor'
+   *
+   */
+  function typeOf(item) {
+    if (item && item.isDescriptor) {
+      return 'descriptor';
+    }
+
+    if (item === null) {
+      return 'null';
+    }
+
+    return typeof(item);
+  }
+
+  function defineProperty(target, keyName, value, getter) {
+    var options = {
+      configurable: true,
+      enumerable: true,
+    };
+
+    if (typeOf(getter) !== 'undefined') {
+      options.get = getter;
+    } else {
+      options.writable = false;
+      options.value = value;
+    }
+
+    Object.defineProperty(target, keyName, options);
+  }
+
+  /**
+   * Default `Descriptor` builder
+   *
+   * @param {TreeNode} node - parent node
+   * @param {String} blueprintKey - key to build
+   * @param {Descriptor} descriptor - descriptor to build
+   * @param {Function} defaultBuilder - default function to build this type of node
+   *
+   * @return undefined
+   */
+  function buildDescriptor(node, blueprintKey, descriptor /*, descriptorBuilder*/) {
+    if (typeof descriptor.setup === 'function') {
+      descriptor.setup(node, blueprintKey);
+    }
+
+    if (descriptor.value) {
+      defineProperty(node, blueprintKey, descriptor.value);
+    } else {
+      defineProperty(node, blueprintKey, undefined, function() {
+        return descriptor.get.call(this, blueprintKey);
+      });
+    }
+  }
+
+  /**
+   * Default `Object` builder
+   *
+   * @param {TreeNode} node - parent node
+   * @param {String} blueprintKey - key to build
+   * @param {Object} blueprint - blueprint to build
+   * @param {Function} defaultBuilder - default function to build this type of node
+   *
+   * @return {Array} [node, blueprint] to build
+   */
+  function buildObject(node, blueprintKey, blueprint /*, defaultBuilder*/) {
+    var value = {};
+
+    // Create child component
+    defineProperty(node, blueprintKey, value);
+
+    // Set meta to object
+    setMeta(value, blueprintKey);
+
+    return [value, blueprint];
+  }
+
+  /**
+   * Default builder
+   *
+   * @param {TreeNode} node - parent node
+   * @param {String} blueprintKey - key to build
+   * @param {Any} value - value to build
+   * @param {Function} defaultBuilder - default function to build this type of node
+   *
+   * @return undefined
+   */
+  function buildDefault(node, blueprintKey, value /*, defaultBuilder*/) {
+    defineProperty(node, blueprintKey, value);
+  }
+
+  function setParent(target, parentTree) {
+    // We want to delete the parent node if we set null or undefine. Also, this
+    // workarounds an issue in phantomjs where we cannot use defineProperty to
+    // redefine a property.
+    // See. https://github.com/ariya/phantomjs/issues/11856
+    delete target['__parentTreeNode'];
+
+    if (parentTree) {
+      Object.defineProperty(target, '__parentTreeNode', { value: parentTree, configurable: true, enumerable: false });
+    }
+  }
+
+  function parent(object) {
+    // Be carefull: typeof(null) === 'object'
+    if (typeof object === 'object' && object !== null) {
+      return object['__parentTreeNode'];
+    }
+  }
+
+  function setMeta(target, key) {
+    Object.defineProperty(target, '__meta', {
+      value: {
+        key: key,
+        type: 'node'
+      },
+      configurable: false,
+      enumerable: false
+    });
+  }
+
+  function meta(object) {
+    // Be carefull: typeof(null) === 'object'
+    if (typeof object === 'object' && object !== null) {
+      return object['__meta'];
+    }
+  }
+
+  function TreeBuilder(blueprint, builders) {
+    this.blueprint = blueprint;
+    this.builders = builders;
+  }
+
+  TreeBuilder.prototype = {
+    builderFor: function(value) {
+      return this.builders[typeOf(value)] || this.builders['default'];
+    },
+
+    build: function(parentTree) {
+      var root = {},
+        node;
+
+      this.processNode({ root: this.blueprint }, root);
+
+      node = root['root'];
+      setParent(node, parentTree);
+
+      return node;
+    },
+
+    processNode: function(blueprintNode, target, parent) {
+      var keys = Object.keys(blueprintNode),
+          that = this;
+
+      keys.forEach(function(key) {
+        var blueprintAttribute = blueprintNode[key],
+            builder,
+            defaultBuilder,
+            result;
+
+        builder = that.builderFor(blueprintAttribute);
+        defaultBuilder = builderFor(blueprintAttribute);
+
+        if (result = builder(target, key, blueprintAttribute, defaultBuilder)) {
+          that.processNode(result[1], result[0], target);
+        }
+      });
+
+      setParent(target, parent);
+
+      return target;
+    }
+  };
+
+  function builderFor(value) {
+    return DEFAULT_BUILDERS[typeOf(value)] || DEFAULT_BUILDERS['default'];
+  }
+
+  var DEFAULT_BUILDERS = {
+    descriptor: buildDescriptor,
+    object: buildObject,
+    default: buildDefault
+  };
+
+  var Ceibo = {
+    defineProperty: defineProperty,
+
+    create: function(blueprint, options) {
+      options = options || {};
+
+      var builder = merge({}, DEFAULT_BUILDERS, options.builder);
+
+      return new TreeBuilder(blueprint, builder).build(options.parent);
+    },
+
+    parent: function(node) {
+      return parent(node);
+    },
+
+    meta: function(node) {
+      return meta(node);
+    }
+  };
+
+  if (typeof define === 'function') {
+    define('ceibo', ['exports'], function(__exports__) {
+      'use strict';
+      __exports__.Ceibo = Ceibo;
+      __exports__.default = Ceibo;
+    });
+  } else {
+    window.Ceibo = Ceibo;
+  }
+}();
+
 ;(function() {
   function objectAt(content, idx) {
     if (content.objectAt) {
@@ -67480,6 +67719,2975 @@ define("ember-cli-app-version/templates/app-version", ["exports"], function (exp
       templates: []
     };
   })());
+});
+define('ember-cli-page-object/-private/better-errors', ['exports', 'ember', 'ceibo'], function (exports, _ember, _ceibo) {
+  'use strict';
+
+  exports.throwBetterError = throwBetterError;
+
+  function throwBetterError(node, key, selector) {
+    var path = [key];
+    var current = undefined;
+
+    for (current = node; current; current = _ceibo['default'].parent(current)) {
+      path.unshift(_ceibo['default'].meta(current).key);
+    }
+
+    path[0] = 'page';
+
+    var msg = 'Element not found.\n\nPageObject: \'' + path.join('.') + '\'\n  Selector: \'' + selector + '\'\n';
+
+    throw new _ember['default'].Error(msg);
+  }
+});
+define('ember-cli-page-object/-private/context', ['exports'], function (exports) {
+  'use strict';
+
+  exports.render = render;
+  exports.setContext = setContext;
+  exports.removeContext = removeContext;
+
+  /**
+   * @public
+   *
+   * Render a component's template in the context of a test.
+   *
+   * Throws an error if a test's context has not been set on the page.
+   *
+   * Returns the page object, which allows for method chaining.
+   *
+   * @example
+   *
+   * page.setContext(this)
+   *   .render(hbs`{{my-component}}`)
+   *   .clickOnText('Hi!');
+   *
+   * @param {Object} template - A compiled component template
+   * @return {PageObject} - the page object
+   */
+
+  function render(template) {
+    if (!this.context) {
+      var message = 'You must set a context on the page object before calling calling `render()`';
+      var error = new Error(message);
+
+      throw error;
+    }
+
+    this.context.render(template);
+
+    return this;
+  }
+
+  /**
+   * @public
+   *
+   * Sets the page's test context.
+   *
+   * Returns the page object, which allows for method chaining.
+   *
+   * @example
+   *
+   * page.setContext(this)
+   *   .render(hbs`{{my-component}}`)
+   *   .clickOnText('Hi!');
+   *
+   * @param {Object} context - A component integration test's `this` context
+   * @return {PageObject} - the page object
+   */
+
+  function setContext(context) {
+    if (context) {
+      this.context = context;
+    }
+
+    return this;
+  }
+
+  /**
+   * @public
+   *
+   * Unsets the page's test context.
+   *
+   * Useful in a component test's `afterEach()` hook, to make sure the context has been cleared after each test.
+   *
+   * @example
+   *
+   * page.removeContext();
+   *
+   * @return {PageObject} - the page object
+   */
+
+  function removeContext() {
+    if (this.context) {
+      delete this.context;
+    }
+
+    return this;
+  }
+});
+define('ember-cli-page-object/-private/create', ['exports', 'ceibo', 'ember-cli-page-object/-private/context', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/properties/visitable', 'ember-cli-page-object/-private/dsl'], function (exports, _ceibo, _emberCliPageObjectPrivateContext, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivatePropertiesVisitable, _emberCliPageObjectPrivateDsl) {
+  'use strict';
+
+  exports.create = create;
+
+  // See https://github.com/san650/ceibo#examples for more info on how Ceibo
+  // builders work.
+  function buildObject(node, blueprintKey, blueprint, defaultBuilder) {
+    blueprint = (0, _emberCliPageObjectPrivateHelpers.assign)((0, _emberCliPageObjectPrivateHelpers.assign)({}, _emberCliPageObjectPrivateDsl['default']), blueprint);
+
+    return defaultBuilder(node, blueprintKey, blueprint, defaultBuilder);
+  }
+
+  /**
+   * Creates a new PageObject.
+   *
+   * By default, the resulting PageObject will respond to:
+   *
+   * - **Actions**: click, clickOn, fillIn, select
+   * - **Predicates**: contains, isHidden, isVisible
+   * - **Queries**: text
+   *
+   * `definition` can include a key `context`, which is an
+   * optional integration test `this` context.
+   *
+   * If a context is passed, it is used by actions, queries, etc.,
+   * as the `this` in `this.$()`.
+   *
+   * If no context is passed, the global Ember acceptence test
+   * helpers are used.
+   *
+   * @example
+   *
+   * // <div class="title">My title</div>
+   *
+   * import PageObject, { text } from 'ember-cli-page-object';
+   *
+   * const page = PageObject.create({
+   *   title: text('.title')
+   * });
+   *
+   * assert.equal(page.title, 'My title');
+   *
+   * @example
+   *
+   * // <div id="my-page">
+   * //   My super text
+   * //   <button>Press Me</button>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   scope: '#my-page'
+   * });
+   *
+   * assert.equal(page.text, 'My super text');
+   * assert.ok(page.contains('super'));
+   * assert.ok(page.isVisible);
+   * assert.notOk(page.isHidden);
+   * assert.equal(page.value, 'my input value');
+   *
+   * // clicks div#my-page
+   * page.click();
+   *
+   * // clicks button
+   * page.clickOn('Press Me');
+   *
+   * // fills an input
+   * page.fillIn('name', 'John Doe');
+   *
+   * // selects an option
+   * page.select('country', 'Uruguay');
+   *
+   * @example Defining path
+   *
+   * const usersPage = PageObject.create('/users');
+   *
+   * // visits user page
+   * usersPage.visit();
+   *
+   * const userTasksPage = PageObject.create('/users/tasks', {
+   *  tasks: collection({
+   *    itemScope: '.tasks li',
+   *    item: {}
+   *  });
+   * });
+   *
+   * // get user's tasks
+   * userTasksPage.visit();
+   * userTasksPage.tasks().count
+   *
+   * @public
+   *
+   * @param {Object} definition - PageObject definition
+   * @param {Object} [definition.context] - A test's `this` context
+   * @param {Object} options - [private] Ceibo options. Do not use!
+   * @return {PageObject}
+   */
+
+  function create(definitionOrUrl, definitionOrOptions, optionsOrNothing) {
+    var definition = undefined;
+    var url = undefined;
+    var options = undefined;
+
+    if (typeof definitionOrUrl === 'string') {
+      url = definitionOrUrl;
+      definition = definitionOrOptions || {};
+      options = optionsOrNothing || {};
+    } else {
+      url = false;
+      definition = definitionOrUrl;
+      options = definitionOrOptions || {};
+    }
+
+    definition = (0, _emberCliPageObjectPrivateHelpers.assign)({}, definition);
+
+    if (url) {
+      definition.visit = (0, _emberCliPageObjectPrivatePropertiesVisitable.visitable)(url);
+    }
+
+    var _definition = definition;
+    var context = _definition.context;
+
+    delete definition.context;
+
+    var builder = {
+      object: buildObject
+    };
+
+    var page = _ceibo['default'].create(definition, (0, _emberCliPageObjectPrivateHelpers.assign)({ builder: builder }, options));
+
+    if (page) {
+      page.render = _emberCliPageObjectPrivateContext.render;
+      page.setContext = _emberCliPageObjectPrivateContext.setContext;
+      page.removeContext = _emberCliPageObjectPrivateContext.removeContext;
+
+      page.setContext(context);
+    }
+
+    return page;
+  }
+});
+define('ember-cli-page-object/-private/dsl', ['exports', 'ember-cli-page-object/-private/properties/text', 'ember-cli-page-object/-private/properties/is-visible', 'ember-cli-page-object/-private/properties/is-hidden', 'ember-cli-page-object/-private/properties/contains', 'ember-cli-page-object/-private/properties/click-on-text', 'ember-cli-page-object/-private/properties/clickable', 'ember-cli-page-object/-private/properties/fillable', 'ember-cli-page-object/-private/properties/value'], function (exports, _emberCliPageObjectPrivatePropertiesText, _emberCliPageObjectPrivatePropertiesIsVisible, _emberCliPageObjectPrivatePropertiesIsHidden, _emberCliPageObjectPrivatePropertiesContains, _emberCliPageObjectPrivatePropertiesClickOnText, _emberCliPageObjectPrivatePropertiesClickable, _emberCliPageObjectPrivatePropertiesFillable, _emberCliPageObjectPrivatePropertiesValue) {
+  'use strict';
+
+  var thenDescriptor = {
+    isDescriptor: true,
+    value: function value() {
+      var _wait;
+
+      /* global wait */
+      return (_wait = wait()).then.apply(_wait, arguments);
+    }
+  };
+
+  var dsl = {
+    contains: (0, _emberCliPageObjectPrivatePropertiesContains.contains)(),
+    isHidden: (0, _emberCliPageObjectPrivatePropertiesIsHidden.isHidden)(),
+    isVisible: (0, _emberCliPageObjectPrivatePropertiesIsVisible.isVisible)(),
+    text: (0, _emberCliPageObjectPrivatePropertiesText.text)(),
+    value: (0, _emberCliPageObjectPrivatePropertiesValue.value)(),
+    clickOn: (0, _emberCliPageObjectPrivatePropertiesClickOnText.clickOnText)(),
+    click: (0, _emberCliPageObjectPrivatePropertiesClickable.clickable)(),
+    fillIn: (0, _emberCliPageObjectPrivatePropertiesFillable.fillable)(),
+    select: (0, _emberCliPageObjectPrivatePropertiesFillable.fillable)(),
+    then: thenDescriptor
+  };
+
+  exports['default'] = dsl;
+});
+define('ember-cli-page-object/-private/execution_context', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context/acceptance', 'ember-cli-page-object/-private/execution_context/integration'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_contextAcceptance, _emberCliPageObjectPrivateExecution_contextIntegration) {
+  'use strict';
+
+  exports.getExecutionContext = getExecutionContext;
+  exports.register = register;
+
+  var executioncontexts = {
+    acceptance: _emberCliPageObjectPrivateExecution_contextAcceptance['default'],
+    integration: _emberCliPageObjectPrivateExecution_contextIntegration['default']
+  };
+
+  /*
+   * @private
+   */
+
+  function getExecutionContext(pageObjectNode) {
+    var testContext = (0, _emberCliPageObjectPrivateHelpers.getContext)(pageObjectNode);
+    var context = testContext ? 'integration' : 'acceptance';
+
+    return new executioncontexts[context](pageObjectNode, testContext);
+  }
+
+  /*
+   * @private
+   */
+
+  function register(type, definition) {
+    executioncontexts[type] = definition;
+  }
+});
+define('ember-cli-page-object/-private/execution_context/acceptance', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/better-errors'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateBetterErrors) {
+  'use strict';
+
+  exports['default'] = AcceptanceExecutionContext;
+
+  function AcceptanceExecutionContext(pageObjectNode) {
+    this.pageObjectNode = pageObjectNode;
+  }
+
+  AcceptanceExecutionContext.prototype = {
+    run: function run(cb) {
+      return cb(this);
+    },
+
+    runAsync: function runAsync(cb) {
+      var _this = this;
+
+      /* global wait */
+      wait().then(function () {
+        cb(_this);
+      });
+
+      return this.pageObjectNode;
+    },
+
+    visit: (function (_visit) {
+      function visit(_x) {
+        return _visit.apply(this, arguments);
+      }
+
+      visit.toString = function () {
+        return _visit.toString();
+      };
+
+      return visit;
+    })(function (path) {
+      /* global visit */
+      visit(path);
+    }),
+
+    click: (function (_click) {
+      function click(_x2, _x3) {
+        return _click.apply(this, arguments);
+      }
+
+      click.toString = function () {
+        return _click.toString();
+      };
+
+      return click;
+    })(function (selector, container) {
+      /* global click */
+      click(selector, container);
+    }),
+
+    fillIn: (function (_fillIn) {
+      function fillIn(_x4, _x5, _x6) {
+        return _fillIn.apply(this, arguments);
+      }
+
+      fillIn.toString = function () {
+        return _fillIn.toString();
+      };
+
+      return fillIn;
+    })(function (selector, container, text) {
+      /* global fillIn */
+      if (container) {
+        fillIn(selector, container, text);
+      } else {
+        fillIn(selector, text);
+      }
+    }),
+
+    triggerEvent: (function (_triggerEvent) {
+      function triggerEvent(_x7, _x8, _x9, _x10) {
+        return _triggerEvent.apply(this, arguments);
+      }
+
+      triggerEvent.toString = function () {
+        return _triggerEvent.toString();
+      };
+
+      return triggerEvent;
+    })(function (selector, container, eventName, eventOptions) {
+      /* global triggerEvent */
+      triggerEvent(selector, container, eventName, eventOptions);
+    }),
+
+    assertElementExists: function assertElementExists(selector, options) {
+      /* global find */
+      var result = find(selector, options.testContainer);
+
+      if (result.length === 0) {
+        (0, _emberCliPageObjectPrivateBetterErrors.throwBetterError)(this.pageObjectNode, options.pageObjectKey, selector);
+      }
+    },
+
+    find: (function (_find) {
+      function find(_x11, _x12) {
+        return _find.apply(this, arguments);
+      }
+
+      find.toString = function () {
+        return _find.toString();
+      };
+
+      return find;
+    })(function (selector, options) {
+      var result = undefined;
+
+      selector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(this.pageObjectNode, selector, options);
+
+      /* global find */
+      result = find(selector, options.testContainer);
+
+      (0, _emberCliPageObjectPrivateHelpers.guardMultiple)(result, selector, options.multiple);
+
+      return result;
+    }),
+
+    findWithAssert: function findWithAssert(selector, options) {
+      var result = undefined;
+
+      selector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(this.pageObjectNode, selector, options);
+
+      /* global find */
+      result = find(selector, options.testContainer);
+
+      if (result.length === 0) {
+        (0, _emberCliPageObjectPrivateBetterErrors.throwBetterError)(this.pageObjectNode, options.pageObjectKey, selector);
+      }
+
+      (0, _emberCliPageObjectPrivateHelpers.guardMultiple)(result, selector, options.multiple);
+
+      return result;
+    }
+  };
+});
+define('ember-cli-page-object/-private/execution_context/integration', ['exports', 'ember', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/better-errors'], function (exports, _ember, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateBetterErrors) {
+  'use strict';
+
+  exports['default'] = IntegrationExecutionContext;
+
+  var _$ = _ember['default'].$;
+  var run = _ember['default'].run;
+
+  function IntegrationExecutionContext(pageObjectNode, testContext) {
+    this.pageObjectNode = pageObjectNode;
+    this.testContext = testContext;
+  }
+
+  IntegrationExecutionContext.prototype = {
+    run: function run(cb) {
+      return cb(this);
+    },
+
+    runAsync: function runAsync(cb) {
+      var _this = this;
+
+      run(function () {
+        cb(_this);
+      });
+
+      return this.pageObjectNode;
+    },
+
+    // Do nothing in integration test
+    visit: _$.noop,
+
+    click: function click(selector, container) {
+      this.$(selector, container).click();
+    },
+
+    fillIn: function fillIn(selector, container, text) {
+      var element = this.$(selector, container);
+
+      element.val(text);
+      element.trigger('input');
+      element.change();
+    },
+
+    $: function $(selector, container) {
+      if (container) {
+        return _$(selector, container);
+      } else {
+        return this.testContext.$(selector);
+      }
+    },
+
+    triggerEvent: function triggerEvent(selector, container, eventName, eventOptions) {
+      var event = _$.Event(eventName, eventOptions);
+
+      if (container) {
+        _$(selector, container).trigger(event);
+      } else {
+        this.testContext.$(selector).trigger(event);
+      }
+    },
+
+    assertElementExists: function assertElementExists(selector, options) {
+      var result = undefined;
+
+      if (options.testContainer) {
+        result = _$(selector, options.testContainer);
+      } else {
+        result = this.testContext.$(selector);
+      }
+
+      if (result.length === 0) {
+        (0, _emberCliPageObjectPrivateBetterErrors.throwBetterError)(this.pageObjectNode, options.pageObjectKey, selector);
+      }
+    },
+
+    find: function find(selector, options) {
+      var result = undefined;
+
+      selector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(this.pageObjectNode, selector, options);
+
+      if (options.testContainer) {
+        result = _$(selector, options.testContainer);
+      } else {
+        result = this.testContext.$(selector);
+      }
+
+      (0, _emberCliPageObjectPrivateHelpers.guardMultiple)(result, selector, options.multiple);
+
+      return result;
+    },
+
+    findWithAssert: function findWithAssert(selector, options) {
+      var result = undefined;
+
+      selector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(this.pageObjectNode, selector, options);
+
+      if (options.testContainer) {
+        result = _$(selector, options.testContainer);
+      } else {
+        result = this.testContext.$(selector);
+      }
+
+      (0, _emberCliPageObjectPrivateHelpers.guardMultiple)(result, selector, options.multiple);
+
+      if (result.length === 0) {
+        (0, _emberCliPageObjectPrivateBetterErrors.throwBetterError)(this.pageObjectNode, options.pageObjectKey, selector);
+      }
+
+      return result;
+    }
+  };
+});
+define('ember-cli-page-object/-private/extend/find-element-with-assert', ['exports', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.findElementWithAssert = findElementWithAssert;
+
+  /**
+   * @public
+   *
+   * Returns a jQuery element matched by a selector built from parameters
+   *
+   * @example
+   *
+   * import { findElementWithAssert } from 'ember-cli-page-object/extend';
+   *
+   * export default function isDisabled(selector, options = {}) {
+   *   return {
+   *     isDescriptor: true,
+   *
+   *     get() {
+   *       return findElementWithAssert(this, selector, options).is(':disabled');
+   *     }
+   *   };
+   * }
+   *
+   * @param {Ceibo} pageObjectNode - Node of the tree
+   * @param {string} targetSelector - Specific CSS selector
+   * @param {Object} options - Additional options
+   * @param {boolean} options.resetScope - Do not use inherited scope
+   * @param {string} options.contains - Filter by using :contains('foo') pseudo-class
+   * @param {number} options.at - Filter by index using :eq(x) pseudo-class
+   * @param {boolean} options.last - Filter by using :last pseudo-class
+   * @param {boolean} options.visible - Filter by using :visible pseudo-class
+   * @param {boolean} options.multiple - Specify if built selector can match multiple elements.
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @param {String} options.pageObjectKey - Used in the error message when the element is not found
+   * @return {Object} jQuery object
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function findElementWithAssert(pageObjectNode, targetSelector) {
+    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(pageObjectNode);
+
+    return executionContext.run(function (context) {
+      return context.findWithAssert(targetSelector, options);
+    });
+  }
+});
+define('ember-cli-page-object/-private/extend/find-element', ['exports', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.findElement = findElement;
+
+  /**
+   * @public
+   *
+   * Returns a jQuery element (can be an empty jQuery result)
+   *
+   * @example
+   *
+   * import { findElement } from 'ember-cli-page-object/extend';
+   *
+   * export default function isDisabled(selector, options = {}) {
+   *   return {
+   *     isDescriptor: true,
+   *
+   *     get() {
+   *       return findElement(this, selector, options).is(':disabled');
+   *     }
+   *   };
+   * }
+   *
+   * @param {Ceibo} pageObjectNode - Node of the tree
+   * @param {string} targetSelector - Specific CSS selector
+   * @param {Object} options - Additional options
+   * @param {boolean} options.resetScope - Do not use inherited scope
+   * @param {string} options.contains - Filter by using :contains('foo') pseudo-class
+   * @param {number} options.at - Filter by index using :eq(x) pseudo-class
+   * @param {boolean} options.last - Filter by using :last pseudo-class
+   * @param {boolean} options.visible - Filter by using :visible pseudo-class
+   * @param {boolean} options.multiple - Specify if built selector can match multiple elements.
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Object} jQuery object
+   *
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function findElement(pageObjectNode, targetSelector) {
+    var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(pageObjectNode);
+
+    return executionContext.run(function (context) {
+      return context.find(targetSelector, options);
+    });
+  }
+});
+define('ember-cli-page-object/-private/helpers', ['exports', 'ember', 'ceibo'], function (exports, _ember, _ceibo) {
+  'use strict';
+
+  var _createClass = (function () {
+    function defineProperties(target, props) {
+      for (var i = 0; i < props.length; i++) {
+        var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ('value' in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);
+      }
+    }return function (Constructor, protoProps, staticProps) {
+      if (protoProps) defineProperties(Constructor.prototype, protoProps);if (staticProps) defineProperties(Constructor, staticProps);return Constructor;
+    };
+  })();
+
+  exports.guardMultiple = guardMultiple;
+  exports.buildSelector = buildSelector;
+  exports.normalizeText = normalizeText;
+  exports.every = every;
+  exports.map = map;
+  exports.getContext = getContext;
+
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError('Cannot call a class as a function');
+    }
+  }
+
+  var $ = _ember['default'].$;
+  var assert = _ember['default'].assert;
+
+  var Selector = (function () {
+    function Selector(node, scope, selector, filters) {
+      _classCallCheck(this, Selector);
+
+      this.targetNode = node;
+      this.targetScope = scope || '';
+      this.targetSelector = selector || '';
+      this.targetFilters = filters;
+    }
+
+    _createClass(Selector, [{
+      key: 'toString',
+      value: function toString() {
+        var scope = undefined;
+        var filters = undefined;
+
+        if (this.targetFilters.resetScope) {
+          scope = this.targetScope;
+        } else {
+          scope = this.calculateScope(this.targetNode, this.targetScope);
+        }
+
+        filters = this.calculateFilters(this.targetFilters);
+
+        var selector = $.trim(scope + ' ' + this.targetSelector + filters);
+
+        if (!selector.length) {
+          // When an empty selector is resolved take the first direct child of the
+          // testing container.
+          selector = ':first';
+        }
+
+        return selector;
+      }
+    }, {
+      key: 'calculateFilters',
+      value: function calculateFilters() {
+        var filters = [];
+
+        if (this.targetFilters.visible) {
+          filters.push(':visible');
+        }
+
+        if (this.targetFilters.contains) {
+          filters.push(':contains("' + this.targetFilters.contains + '")');
+        }
+
+        if (typeof this.targetFilters.at === 'number') {
+          filters.push(':eq(' + this.targetFilters.at + ')');
+        } else if (this.targetFilters.last) {
+          filters.push(':last');
+        }
+
+        return filters.join('');
+      }
+    }, {
+      key: 'calculateScope',
+      value: function calculateScope(node, targetScope) {
+        var scopes = this.getScopes(node);
+
+        scopes.reverse();
+        scopes.push(targetScope);
+
+        return $.trim(scopes.join(' '));
+      }
+    }, {
+      key: 'getScopes',
+      value: function getScopes(node) {
+        var scopes = [];
+
+        if (node.scope) {
+          scopes.push(node.scope);
+        }
+
+        if (!node.resetScope && _ceibo['default'].parent(node)) {
+          scopes = scopes.concat(this.calculateScope(_ceibo['default'].parent(node)));
+        }
+
+        return scopes;
+      }
+    }]);
+
+    return Selector;
+  })();
+
+  function guardMultiple(items, selector, supportMultiple) {
+    assert('"' + selector + '" matched more than one element. If this is not an error use { multiple: true }', supportMultiple || items.length <= 1);
+  }
+
+  /**
+   * @public
+   *
+   * Builds a CSS selector from a target selector and a PageObject or a node in a PageObject, along with optional parameters.
+   *
+   * @example
+   *
+   * const component = PageObject.create({ scope: '.component'});
+   *
+   * buildSelector(component, '.my-element');
+   * // returns '.component .my-element'
+   *
+   * @example
+   *
+   * const page = PageObject.create({});
+   *
+   * buildSelector(page, '.my-element', { at: 0 });
+   * // returns '.my-element:eq(0)'
+   *
+   * @example
+   *
+   * const page = PageObject.create({});
+   *
+   * buildSelector(page, '.my-element', { contains: "Example" });
+   * // returns ".my-element :contains('Example')"
+   *
+   * @example
+   *
+   * const page = PageObject.create({});
+   *
+   * buildSelector(page, '.my-element', { last: true });
+   * // returns '.my-element:last'
+   *
+   * @param {Ceibo} node - Node of the tree
+   * @param {string} targetSelector - CSS selector
+   * @param {Object} options - Additional options
+   * @param {boolean} options.resetScope - Do not use inherited scope
+   * @param {string} options.contains - Filter by using :contains('foo') pseudo-class
+   * @param {number} options.at - Filter by index using :eq(x) pseudo-class
+   * @param {boolean} options.last - Filter by using :last pseudo-class
+   * @param {boolean} options.visible - Filter by using :visible pseudo-class
+   * @return {string} Fully qualified selector
+   */
+
+  function buildSelector(node, targetSelector, options) {
+    return new Selector(node, options.scope, targetSelector, options).toString();
+  }
+
+  /**
+   * @private
+   *
+   * Trim whitespaces at both ends and normalize whitespaces inside `text`
+   *
+   * Due to variations in the HTML parsers in different browsers, the text
+   * returned may vary in newlines and other white space.
+   *
+   * @see http://api.jquery.com/text/
+   */
+
+  function normalizeText(text) {
+    return $.trim(text).replace(/\n/g, ' ').replace(/\s\s*/g, ' ');
+  }
+
+  function every(jqArray, cb) {
+    var arr = jqArray.get();
+
+    return _ember['default'].A(arr).every(function (element) {
+      return cb($(element));
+    });
+  }
+
+  function map(jqArray, cb) {
+    var arr = jqArray.get();
+
+    return _ember['default'].A(arr).map(function (element) {
+      return cb($(element));
+    });
+  }
+
+  /**
+   * @private
+   *
+   * Return the root of a node's tree
+   *
+   * @param {Ceibo} node - Node of the tree
+   * @return {Ceibo} node - Root node of the tree
+   */
+  function getRoot(node) {
+    var parent = _ceibo['default'].parent(node);
+    var root = node;
+
+    while (parent) {
+      root = parent;
+      parent = _ceibo['default'].parent(parent);
+    }
+
+    return root;
+  }
+
+  /**
+   * @public
+   *
+   * Return a test context if one was provided during `create()`
+   *
+   * @param {Ceibo} node - Node of the tree
+   * @return {?Object} The test's `this` context, or null
+   */
+
+  function getContext(node) {
+    var root = getRoot(node);
+    var context = root.context;
+
+    if (typeof context === 'object' && typeof context.$ === 'function') {
+      return context;
+    } else {
+      return null;
+    }
+  }
+
+  var assign = _ember['default'].assign || _ember['default'].merge;
+  exports.assign = assign;
+});
+define('ember-cli-page-object/-private/properties/attribute', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.attribute = attribute;
+
+  /**
+   * @public
+   *
+   * Returns the value of an attribute from the matched element, or an array of
+   * values from multiple matched elements.
+   *
+   * @example
+   * // <input placeholder="a value">
+   *
+   * const page = PageObject.create({
+   *   inputPlaceholder: PageObject.attribute('placeholder', 'input')
+   * });
+   *
+   * assert.equal(page.inputPlaceholder, 'a value');
+   *
+   * @example
+   *
+   * // <input placeholder="a value">
+   * // <input placeholder="other value">
+   *
+   * const page = PageObject.create({
+   *   inputPlaceholders: PageObject.attribute('placeholder', ':input', { multiple: true })
+   * });
+   *
+   * assert.deepEqual(page.inputPlaceholders, ['a value', 'other value']);
+   *
+   * @example
+   *
+   * // <div><input></div>
+   * // <div class="scope"><input placeholder="a value"></div>
+   * // <div><input></div>
+   *
+   * const page = PageObject.create({
+   *   inputPlaceholder: PageObject.attribute('placeholder', ':input', { scope: '.scope' })
+   * });
+   *
+   * assert.equal(page.inputPlaceholder, 'a value');
+   *
+   * @example
+   *
+   * // <div><input></div>
+   * // <div class="scope"><input placeholder="a value"></div>
+   * // <div><input></div>
+   *
+   * const page = PageObject.create({
+   *   scope: 'scope',
+   *   inputPlaceholder: PageObject.attribute('placeholder', ':input')
+   * });
+   *
+   * assert.equal(page.inputPlaceholder, 'a value');
+   *
+   * @public
+   *
+   * @param {string} attributeName - Name of the attribute to get
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.multiple - If set, the function will return an array of values
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function attribute(attributeName, selector) {
+    var userOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(selector, options);
+          var result = undefined;
+
+          result = (0, _emberCliPageObjectPrivateHelpers.map)(elements, function (element) {
+            return element.attr(attributeName);
+          });
+
+          return options.multiple ? result : result[0];
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/click-on-text', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context', 'ember-cli-page-object/-private/properties/click-on-text/helpers'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context, _emberCliPageObjectPrivatePropertiesClickOnTextHelpers) {
+  'use strict';
+
+  exports.clickOnText = clickOnText;
+
+  /**
+   * Clicks on an element containing specified text.
+   *
+   * The element can either match a specified selector,
+   * or be inside an element matching the specified selector.
+   *
+   * @example
+   *
+   * // <fieldset>
+   * //  <button>Lorem</button>
+   * //  <button>Ipsum</button>
+   * // </fieldset>
+   *
+   * const page = PageObject.create({
+   *   clickOnFieldset: PageObject.clickOnText('fieldset'),
+   *   clickOnButton: PageObject.clickOnText('button')
+   * });
+   *
+   * // queries the DOM with selector 'fieldset :contains("Lorem"):last'
+   * page.clickOnFieldset('Lorem');
+   *
+   * // queries the DOM with selector 'button:contains("Ipsum")'
+   * page.clickOnButton('Ipsum');
+   *
+   * @example
+   *
+   * // <div class="scope">
+   * //   <fieldset>
+   * //    <button>Lorem</button>
+   * //    <button>Ipsum</button>
+   * //   </fieldset>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   clickOnFieldset: PageObject.clickOnText('fieldset', { scope: '.scope' }),
+   *   clickOnButton: PageObject.clickOnText('button', { scope: '.scope' })
+   * });
+   *
+   * // queries the DOM with selector '.scope fieldset :contains("Lorem"):last'
+   * page.clickOnFieldset('Lorem');
+   *
+   * // queries the DOM with selector '.scope button:contains("Ipsum")'
+   * page.clickOnButton('Ipsum');
+   *
+   * @example
+   *
+   * // <div class="scope">
+   * //   <fieldset>
+   * //    <button>Lorem</button>
+   * //    <button>Ipsum</button>
+   * //   </fieldset>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   clickOnFieldset: PageObject.clickOnText('fieldset'),
+   *   clickOnButton: PageObject.clickOnText('button')
+   * });
+   *
+   * // queries the DOM with selector '.scope fieldset :contains("Lorem"):last'
+   * page.clickOnFieldset('Lorem');
+   *
+   * // queries the DOM with selector '.scope button:contains("Ipsum")'
+   * page.clickOnButton('Ipsum');
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element in which to look for text
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.visible - Make the action to raise an error if the element is not visible
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   */
+
+  function clickOnText(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        return function (textToClick) {
+          var _this = this;
+
+          var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+          var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key + '("' + textToClick + '")', contains: textToClick }, userOptions);
+
+          return executionContext.runAsync(function (context) {
+            var fullSelector = (0, _emberCliPageObjectPrivatePropertiesClickOnTextHelpers.buildSelector)(_this, context, selector, options);
+
+            context.assertElementExists(fullSelector, options);
+
+            context.click(fullSelector, options.testContainer);
+          });
+        };
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/click-on-text/helpers', ['exports', 'ember-cli-page-object/-private/helpers'], function (exports, _emberCliPageObjectPrivateHelpers) {
+  'use strict';
+
+  exports.buildSelector = buildSelector;
+
+  function childSelector(pageObjectNode, context, selector, options) {
+    // Suppose that we have something like `<form><button>Submit</button></form>`
+    // In this case <form> and <button> elements contains "Submit" text, so, we'll
+    // want to __always__ click on the __last__ element that contains the text.
+    var selectorWithSpace = (selector || '') + ' ';
+    var opts = (0, _emberCliPageObjectPrivateHelpers.assign)({ last: true, multiple: true }, options);
+
+    if (context.find(selectorWithSpace, opts).length) {
+      return (0, _emberCliPageObjectPrivateHelpers.buildSelector)(pageObjectNode, selectorWithSpace, opts);
+    }
+  }
+
+  function buildSelector(pageObjectNode, context, selector, options) {
+    var childSel = childSelector(pageObjectNode, context, selector, options);
+
+    if (childSel) {
+      return childSel;
+    } else {
+      return (0, _emberCliPageObjectPrivateHelpers.buildSelector)(pageObjectNode, selector, options);
+    }
+  }
+});
+define('ember-cli-page-object/-private/properties/clickable', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.clickable = clickable;
+
+  /**
+   * Clicks elements matched by a selector.
+   *
+   * @example
+   *
+   * // <button class="continue">Continue<button>
+   * // <button>Cancel</button>
+   *
+   * const page = PageObject.create({
+   *   continue: clickable('button.continue')
+   * });
+   *
+   * // clicks on element with selector 'button.continue'
+   * page.continue();
+   *
+   * @example
+   *
+   * // <div class="scope">
+   * //   <button>Continue<button>
+   * // </div>
+   * // <button>Cancel</button>
+   *
+   * const page = PageObject.create({
+   *   continue: clickable('button.continue', { scope: '.scope' })
+   * });
+   *
+   * // clicks on element with selector '.scope button.continue'
+   * page.continue();
+   *
+   * @example
+   *
+   * // <div class="scope">
+   * //   <button>Continue<button>
+   * // </div>
+   * // <button>Cancel</button>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   continue: clickable('button.continue')
+   * });
+   *
+   * // clicks on element with selector '.scope button.continue'
+   * page.continue();
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to click
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.visible - Make the action to raise an error if the element is not visible
+   * @param {boolean} options.resetScope - Ignore parent scope
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   */
+
+  function clickable(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        return function () {
+          var _this = this;
+
+          var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+          var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key + '()' }, userOptions);
+
+          return executionContext.runAsync(function (context) {
+            var fullSelector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(_this, selector, options);
+
+            context.assertElementExists(fullSelector, options);
+
+            context.click(fullSelector, options.testContainer);
+          });
+        };
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/collection', ['exports', 'ember', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/create', 'ember-cli-page-object/-private/properties/count', 'ceibo'], function (exports, _ember, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateCreate, _emberCliPageObjectPrivatePropertiesCount, _ceibo) {
+  'use strict';
+
+  exports.collection = collection;
+
+  var arrayDelegateMethods = ['map', 'filter', 'mapBy', 'filterBy'];
+
+  function merge(target) {
+    for (var _len = arguments.length, objects = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      objects[_key - 1] = arguments[_key];
+    }
+
+    objects.forEach(function (o) {
+      return (0, _emberCliPageObjectPrivateHelpers.assign)(target, o);
+    });
+
+    return target;
+  }
+
+  function generateEnumerable(node, definition, item, key) {
+    var enumerable = merge({}, definition);
+
+    if (typeof enumerable.count === 'undefined') {
+      enumerable.count = (0, _emberCliPageObjectPrivatePropertiesCount.count)(item.itemScope);
+    }
+
+    if (typeof enumerable.toArray === 'undefined') {
+      enumerable.toArray = toArrayMethod(node, item, key);
+      arrayDelegateMethods.forEach(function (method) {
+        return delegateToArray(enumerable, method);
+      });
+    }
+
+    var collection = (0, _emberCliPageObjectPrivateCreate.create)(enumerable, { parent: node });
+
+    if (typeof Symbol !== 'undefined' && Symbol.iterator) {
+      collection[Symbol.iterator] = iteratorMethod;
+    }
+
+    // Change the key of the root node
+    _ceibo['default'].meta(collection).key = key + '()';
+
+    return collection;
+  }
+
+  function generateItem(node, index, definition, key) {
+    var filters = merge({}, { scope: definition.scope, at: index });
+    var scope = (0, _emberCliPageObjectPrivateHelpers.buildSelector)({}, definition.itemScope, filters);
+
+    var tree = (0, _emberCliPageObjectPrivateCreate.create)(merge({}, definition.item, { scope: scope, resetScope: definition.resetScope }), { parent: node });
+
+    // Change the key of the root node
+    _ceibo['default'].meta(tree).key = key + '(' + index + ')';
+
+    return tree;
+  }
+
+  function toArrayMethod(node, definition, key) {
+    return function () {
+      var array = _ember['default'].A();
+      var index = undefined;
+      var count = undefined;
+
+      for (index = 0, count = this.count; index < count; index++) {
+        array.push(generateItem(node, index, definition, key));
+      }
+
+      return array;
+    };
+  }
+
+  function delegateToArray(enumerable, method) {
+    if (typeof enumerable[method] === 'undefined') {
+      enumerable[method] = function () {
+        var _toArray;
+
+        return (_toArray = this.toArray())[method].apply(_toArray, arguments);
+      };
+    }
+  }
+
+  function iteratorMethod() {
+    var i = 0;
+    var items = this.toArray();
+    var next = function next() {
+      return { done: i >= items.length, value: items[i++] };
+    };
+
+    return { next: next };
+  }
+
+  /**
+   * @public
+   *
+   * Creates a component that represents a collection of items. The collection is zero-indexed.
+   *
+   * When called with an index, the method returns the matching item.
+   *
+   * When called without an index, the the object returned behaves as a regular PageObject with a few additional properties and methods:
+   *
+   * - `count` - the number of items in the collection
+   * - `toArray()` - returns an array containing all the items in the collection
+   * - `[Symbol.iterator]()` - if supported by the environment, this allows the collection to be iterated with `for/of` and spread with `...` like a normal array
+   *
+   * Collection objects also delegate the following methods to `toArray()` for ease of consumption:
+   * - `map`
+   * - `mapBy`
+   * - `filter`
+   * - `filterBy`
+   *
+   *
+   * @example
+   *
+   * // <table>
+   * //   <caption>List of users</caption>
+   * //   <tbody>
+   * //     <tr>
+   * //       <td>Mary<td>
+   * //       <td>Watson</td>
+   * //     </tr>
+   * //     <tr>
+   * //       <td>John<td>
+   * //       <td>Doe</td>
+   * //     </tr>
+   * //   </tbody>
+   * // </table>
+   *
+   * const page = PageObject.create({
+   *   users: collection({
+   *     itemScope: 'table tr',
+   *
+   *     item: {
+   *       firstName: text('td', { at: 0 }),
+   *       lastName: text('td', { at: 1 })
+   *     },
+   *
+   *     caption: text('caption')
+   *   })
+   * });
+   *
+   * assert.equal(page.users().count, 2);
+   * assert.equal(page.users().caption, 'List of users');
+   * assert.equal(page.users(1).firstName, 'John');
+   * assert.equal(page.users(1).lastName, 'Doe');
+   *
+   * @example
+   *
+   * // <div class="admins">
+   * //   <table>
+   * //     <tbody>
+   * //       <tr>
+   * //         <td>Mary<td>
+   * //         <td>Watson</td>
+   * //       </tr>
+   * //       <tr>
+   * //         <td>John<td>
+   * //         <td>Doe</td>
+   * //       </tr>
+   * //     </tbody>
+   * //   </table>
+   * // </div>
+   *
+   * // <div class="normal">
+   * //   <table>
+   * //   </table>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   users: collection({
+   *     scope: '.admins',
+   *
+   *     itemScope: 'table tr',
+   *
+   *     item: {
+   *       firstName: text('td', { at: 0 }),
+   *       lastName: text('td', { at: 1 })
+   *     }
+   *   })
+   * });
+   *
+   * assert.equal(page.users().count, 2);
+   *
+   * @example
+   *
+   * // <table>
+   * //   <caption>User Index</caption>
+   * //   <tbody>
+   * //     <tr>
+   * //       <td>Doe</td>
+   * //     </tr>
+   * //   </tbody>
+   * // </table>
+   *
+   * const page = PageObject.create({
+   *   users: PageObject.collection({
+   *     scope: 'table',
+   *     itemScope: 'tr',
+   *
+   *     item: {
+   *       firstName: text('td', { at: 0 })
+   *     },
+   *
+   *     caption: PageObject.text('caption')
+   *   })
+   * });
+   *
+   * assert.equal(page.users().caption, 'User Index');
+   *
+   * @param {Object} definition - Collection definition
+   * @param {string} definition.scope - Nests provided scope within parent's scope
+   * @param {boolean} definition.resetScope - Override parent's scope
+   * @param {String} definition.itemScope - CSS selector
+   * @param {Object} definition.item - Item definition
+   * @return {Descriptor}
+   */
+
+  function collection(definition) {
+    definition = (0, _emberCliPageObjectPrivateHelpers.assign)({}, definition);
+
+    var item = {
+      scope: definition.scope,
+      itemScope: definition.itemScope,
+      resetScope: definition.resetScope,
+      item: definition.item
+    };
+
+    delete definition.item;
+    delete definition.itemScope;
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var _this = this;
+
+        return function (index) {
+          if (typeof index === 'number') {
+            return generateItem(_this, index, item, key);
+          } else {
+            return generateEnumerable(_this, definition, item, key);
+          }
+        };
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/contains', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.contains = contains;
+
+  /**
+   * Returns a boolean representing whether an element or a set of elements contains the specified text.
+   *
+   * @example
+   *
+   * // Lorem <span>ipsum</span>
+   *
+   * const page = PageObject.create({
+   *   spanContains: PageObject.contains('span')
+   * });
+   *
+   * assert.ok(page.spanContains('ipsum'));
+   *
+   * @example
+   *
+   * // <span>lorem</span>
+   * // <span>ipsum</span>
+   * // <span>dolor</span>
+   *
+   * const page = PageObject.create({
+   *   spansContain: PageObject.contains('span', { multiple: true })
+   * });
+   *
+   * // not all spans contain 'lorem'
+   * assert.notOk(page.spansContain('lorem'));
+   *
+   * @example
+   *
+   * // <span>super text</span>
+   * // <span>regular text</span>
+   *
+   * const page = PageObject.create({
+   *   spansContain: PageObject.contains('span', { multiple: true })
+   * });
+   *
+   * // all spans contain 'text'
+   * assert.ok(page.spanContains('text'));
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope"><span>ipsum</span></div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   spanContains: PageObject.contains('span', { scope: '.scope' })
+   * });
+   *
+   * assert.notOk(page.spanContains('lorem'));
+   * assert.ok(page.spanContains('ipsum'));
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope"><span>ipsum</span></div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+  
+   *   spanContains: PageObject.contains('span')
+   * });
+   *
+   * assert.notOk(page.spanContains('lorem'));
+   * assert.ok(page.spanContains('ipsum'));
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {boolean} options.multiple - Check if all elements matched by selector contain the subtext
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function contains(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        return function (textToSearch) {
+          var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+          var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key + '("' + textToSearch + '")' }, userOptions);
+
+          return executionContext.run(function (context) {
+            var elements = context.findWithAssert(selector, options);
+
+            return (0, _emberCliPageObjectPrivateHelpers.every)(elements, function (element) {
+              return element.text().indexOf(textToSearch) >= 0;
+            });
+          });
+        };
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/count', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.count = count;
+
+  /**
+   * @public
+   *
+   * Returns the number of elements matched by a selector.
+   *
+   * @example
+   *
+   * // <span>1</span>
+   * // <span>2</span>
+   *
+   * const page = PageObject.create({
+   *   spanCount: PageObject.count('span')
+   * });
+   *
+   * assert.equal(page.spanCount, 2);
+   *
+   * @example
+   *
+   * // <div>Text</div>
+   *
+   * const page = PageObject.create({
+   *   spanCount: PageObject.count('span')
+   * });
+   *
+   * assert.equal(page.spanCount, 0);
+   *
+   * @example
+   *
+   * // <div><span></span></div>
+   * // <div class="scope"><span></span><span></span></div>
+   *
+   * const page = PageObject.create({
+   *   spanCount: PageObject.count('span', { scope: '.scope' })
+   * });
+   *
+   * assert.equal(page.spanCount, 2)
+   *
+   * @example
+   *
+   * // <div><span></span></div>
+   * // <div class="scope"><span></span><span></span></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   spanCount: PageObject.count('span')
+   * });
+   *
+   * assert.equal(page.spanCount, 2)
+   *
+   * @example
+   *
+   * // <div><span></span></div>
+   * // <div class="scope"><span></span><span></span></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   spanCount: PageObject.count('span', { resetScope: true })
+   * });
+   *
+   * assert.equal(page.spanCount, 1);
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element or elements to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Add scope
+   * @param {boolean} options.resetScope - Ignore parent scope
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   */
+
+  function count(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        options = (0, _emberCliPageObjectPrivateHelpers.assign)(options, { multiple: true });
+
+        return executionContext.run(function (context) {
+          return context.find(selector, options).length;
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/fillable', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.fillable = fillable;
+
+  /**
+   * Alias for `fillable`, which works for inputs and HTML select menus.
+   *
+   * [See `fillable` for usage examples.](#fillable)
+   *
+   * @name selectable
+   * @function
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to look for text
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   */
+
+  /**
+   * Fills in an input matched by a selector.
+   *
+   * @example
+   *
+   * // <input value="">
+   *
+   * const page = PageObject.create({
+   *   fillIn: PageObject.fillable('input')
+   * });
+   *
+   * // result: <input value="John Doe">
+   * page.fillIn('John Doe');
+   *
+   * @example
+   *
+   * // <div class="name">
+   * //   <input value="">
+   * // </div>
+   * // <div class="last-name">
+   * //   <input value= "">
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   fillInName: PageObject.fillable('input', { scope: '.name' })
+   * });
+   *
+   * page.fillInName('John Doe');
+   *
+   * // result
+   * // <div class="name">
+   * //   <input value="John Doe">
+   * // </div>
+   *
+   * @example
+   *
+   * // <div class="name">
+   * //   <input value="">
+   * // </div>
+   * // <div class="last-name">
+   * //   <input value= "">
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   scope: 'name',
+   *   fillInName: PageObject.fillable('input')
+   * });
+   *
+   * page.fillInName('John Doe');
+   *
+   * // result
+   * // <div class="name">
+   * //   <input value="John Doe">
+   * // </div>
+   *
+   * @example <caption>Filling different inputs with the same property</caption>
+   *
+   * // <input id="name">
+   * // <input name="lastname">
+   * // <input data-test="email">
+   * // <textarea aria-label="address">
+   * // <input placeholder="phone">
+   *
+   * const page = create({
+   *   fillIn: fillable('input')
+   * });
+   *
+   * page
+   *   .fillIn('name', 'Doe')
+   *   .fillIn('lastname', 'Doe')
+   *   .fillIn('email', 'john@doe')
+   *   .fillIn('address', 'A street')
+   *   .fillIn('phone', '555-000');
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to look for text
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   */
+
+  function fillable(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        return function (textOrClue, text) {
+          var _this = this;
+
+          var clue = undefined;
+
+          if (text === undefined) {
+            text = textOrClue;
+          } else {
+            clue = textOrClue;
+          }
+
+          var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+          var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key + '()' }, userOptions);
+
+          return executionContext.runAsync(function (context) {
+            var fullSelector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(_this, selector, options);
+
+            if (clue) {
+              fullSelector = ['input', 'textarea', 'select'].map(function (tag) {
+                return [fullSelector + ' ' + tag + '[data-test="' + clue + '"]', fullSelector + ' ' + tag + '[aria-label="' + clue + '"]', fullSelector + ' ' + tag + '[placeholder="' + clue + '"]', fullSelector + ' ' + tag + '[name="' + clue + '"]', fullSelector + ' ' + tag + '#' + clue];
+              }).reduce(function (total, other) {
+                return total.concat(other);
+              }, []).join(',');
+            }
+
+            context.assertElementExists(fullSelector, options);
+
+            context.fillIn(fullSelector, options.testContainer, text);
+          });
+        };
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/has-class', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.hasClass = hasClass;
+
+  /**
+   * Validates if an element or a set of elements have a given CSS class.
+   *
+   * @example
+   *
+   * // <em class="lorem"></em><span class="success">Message!</span>
+   *
+   * const page = PageObject.create({
+   *   messageIsSuccess: PageObject.hasClass('success', 'span')
+   * });
+   *
+   * assert.ok(page.messageIsSuccess);
+   *
+   * @example
+   *
+   * // <span class="success"></span>
+   * // <span class="error"></span>
+   *
+   * const page = PageObject.create({
+   *   messagesAreSuccessful: PageObject.hasClass('success', 'span', { multiple: true })
+   * });
+   *
+   * assert.notOk(page.messagesAreSuccessful);
+   *
+   * @example
+   *
+   * // <span class="success"></span>
+   * // <span class="success"></span>
+   *
+   * const page = PageObject.create({
+   *   messagesAreSuccessful: PageObject.hasClass('success', 'span', { multiple: true })
+   * });
+   *
+   * assert.ok(page.messagesAreSuccessful);
+   *
+   * @example
+   *
+   * // <div>
+   * //   <span class="lorem"></span>
+   * // </div>
+   * // <div class="scope">
+   * //   <span class="ipsum"></span>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   spanHasClass: PageObject.hasClass('ipsum', 'span', { scope: '.scope' })
+   * });
+   *
+   * assert.ok(page.spanHasClass);
+   *
+   * @example
+   *
+   * // <div>
+   * //   <span class="lorem"></span>
+   * // </div>
+   * // <div class="scope">
+   * //   <span class="ipsum"></span>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   spanHasClass: PageObject.hasClass('ipsum', 'span')
+   * });
+   *
+   * assert.ok(page.spanHasClass);
+   *
+   * @public
+   *
+   * @param {string} cssClass - CSS class to be validated
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {boolean} options.multiple - Check if all elements matched by selector have the CSS class
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function hasClass(cssClass, selector) {
+    var userOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(selector, options);
+
+          return (0, _emberCliPageObjectPrivateHelpers.every)(elements, function (element) {
+            return element.hasClass(cssClass);
+          });
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/is-hidden', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.isHidden = isHidden;
+
+  /**
+   * Validates if an element or set of elements are hidden or exist in the DOM.
+   *
+   * @example
+   *
+   * // Lorem <span style="display:none">ipsum</span>
+   *
+   * const page = PageObject.create({
+   *   spanIsHidden: PageObject.isHidden('span')
+   * });
+   *
+   * assert.ok(page.spanIsHidden);
+   *
+   * @example
+   *
+   * // <span>ipsum</span>
+   * // <span style="display:none">dolor</span>
+   *
+   * const page = create({
+   *   spansAreHidden: PageObject.isHidden('span', { multiple: true })
+   * });
+   *
+   * // not all spans are hidden
+   * assert.notOk(page.spansAreHidden);
+   *
+   * @example
+   *
+   * // <span style="display:none">dolor</span>
+   * // <span style="display:none">dolor</span>
+   *
+   * const page = create({
+   *   spansAreHidden: PageObject.isHidden('span', { multiple: true })
+   * });
+   *
+   * // all spans are hidden
+   * assert.ok(page.spansAreHidden);
+   *
+   * @example
+   *
+   * // Lorem <strong>ipsum</strong>
+   *
+   * const page = PageObject.create({
+   *   spanIsHidden: PageObject.isHidden('span')
+   * });
+   *
+   * // returns true when element doesn't exist in DOM
+   * assert.ok(page.spanIsHidden);
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope"><span style="display:none">ipsum</span></div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   scopedSpanIsHidden: PageObject.isHidden('span', { scope: '.scope' })
+   * });
+   *
+   * assert.ok(page.scopedSpanIsHidden);
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope"><span style="display:none">ipsum</span></div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   scopedSpanIsHidden: PageObject.isHidden('span')
+   * });
+   *
+   * assert.ok(page.scopedSpanIsHidden);
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {boolean} options.multiple - Check if all elements matched by selector are hidden
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function isHidden(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.find(selector, options);
+
+          return (0, _emberCliPageObjectPrivateHelpers.every)(elements, function (element) {
+            return element.is(':hidden');
+          });
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/is-visible', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.isVisible = isVisible;
+
+  /**
+   * Validates if an element or set of elements are visible.
+   *
+   * @example
+   *
+   * // Lorem <span>ipsum</span>
+   *
+   * const page = PageObject.create({
+   *   spanIsVisible: PageObject.isVisible('span')
+   * });
+   *
+   * assert.ok(page.spanIsVisible);
+   *
+   * @example
+   *
+   * // <span>ipsum</span>
+   * // <span style="display:none">dolor</span>
+   *
+   * const page = PageObject.create({
+   *   spansAreVisible: PageObject.isVisible('span', { multiple: true })
+   * });
+   *
+   * // not all spans are visible
+   * assert.notOk(page.spansAreVisible);
+   *
+   * @example
+   *
+   * // <span>ipsum</span>
+   * // <span>dolor</span>
+   *
+   * const page = PageObject.create({
+   *   spansAreVisible: PageObject.isVisible('span', { multiple: true })
+   * });
+   *
+   * // all spans are visible
+   * assert.ok(page.spansAreVisible);
+   *
+   * @example
+   *
+   * // Lorem <strong>ipsum</strong>
+   *
+   * const page = PageObject.create({
+   *   spanIsVisible: PageObject.isHidden('span')
+   * });
+   *
+   * // returns false when element doesn't exist in DOM
+   * assert.notOk(page.spanIsVisible);
+   *
+   * @example
+   *
+   * // <div>
+   * //   <span style="display:none">lorem</span>
+   * // </div>
+   * // <div class="scope">
+   * //   <span>ipsum</span>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   spanIsVisible: PageObject.isHidden('span', { scope: '.scope' })
+   * });
+   *
+   * assert.ok(page.spanIsVisible);
+   *
+   * @example
+   *
+   * // <div>
+   * //   <span style="display:none">lorem</span>
+   * // </div>
+   * // <div class="scope">
+   * //   <span>ipsum</span>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   spanIsVisible: PageObject.isHidden('span')
+   * });
+   *
+   * assert.ok(page.spanIsVisible);
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {boolean} options.multiple - Check if all elements matched by selector are visible
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function isVisible(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.find(selector, options);
+
+          if (elements.length === 0) {
+            return false;
+          }
+
+          return (0, _emberCliPageObjectPrivateHelpers.every)(elements, function (element) {
+            return element.is(':visible');
+          });
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/is', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.is = is;
+
+  /**
+   * @public
+   *
+   * Validates if an element (or elements) matches a given selector.
+   *
+   * Useful for checking if an element (or elements) matches a selector like
+   * `:disabled` or `:checked`, which can be the result of either an attribute
+   * (`disabled="disabled"`, `disabled=true`) or a property (`disabled`).
+   *
+   * @example
+   * // <input type="checkbox" checked="checked">
+   * // <input type="checkbox" checked>
+   *
+   * const page = PageObject.create({
+   *   areInputsChecked: is(':checked', 'input', { multiple: true })
+   * });
+   *
+   * assert.equal(page.areInputsChecked, true, 'Inputs are checked');
+   *
+   * @example
+   * // <button class="toggle-button active" disabled>Toggle something</button>
+   *
+   * const page = PageObject.create({
+   *   isToggleButtonActive: is('.active:disabled', '.toggle-button')
+   * });
+   *
+   * assert.equal(page.isToggleButtonActive, true, 'Button is active');
+   *
+   * @param {string} testSelector - CSS selector to test
+   * @param {string} targetSelector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.multiple - If set, the function will return an array of values
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function is(testSelector, targetSelector) {
+    var userOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(targetSelector, options);
+
+          return (0, _emberCliPageObjectPrivateHelpers.every)(elements, function (element) {
+            return element.is(testSelector);
+          });
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/not-has-class', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.notHasClass = notHasClass;
+
+  /**
+   * @public
+   *
+   * Validates if an element or a set of elements don't have a given CSS class.
+   *
+   * @example
+   *
+   * // <em class="lorem"></em><span class="success">Message!</span>
+   *
+   * const page = PageObject.create({
+   *   messageIsSuccess: PageObject.notHasClass('error', 'span')
+   * });
+   *
+   * assert.ok(page.messageIsSuccess);
+   *
+   * @example
+   *
+   * // <span class="success"></span>
+   * // <span class="error"></span>
+   *
+   * const page = PageObject.create({
+   *   messagesAreSuccessful: PageObject.notHasClass('error', 'span', { multiple: true })
+   * });
+   *
+   * // one span has error class
+   * assert.notOk(page.messagesAreSuccessful);
+   *
+   * @example
+   *
+   * // <span class="success"></span>
+   * // <span class="success"></span>
+   *
+   * const page = PageObject.create({
+   *   messagesAreSuccessful: PageObject.notHasClass('error', 'span', { multiple: true })
+   * });
+   *
+   * // no spans have error class
+   * assert.ok(page.messagesAreSuccessful);
+   *
+   * @example
+   *
+   * // <div>
+   * //   <span class="lorem"></span>
+   * // </div>
+   * // <div class="scope">
+   * //   <span class="ipsum"></span>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   spanNotHasClass: PageObject.notHasClass('lorem', 'span', { scope: '.scope' })
+   * });
+   *
+   * assert.ok(page.spanNotHasClass);
+   *
+   * @example
+   *
+   * // <div>
+   * //   <span class="lorem"></span>
+   * // </div>
+   * // <div class="scope">
+   * //   <span class="ipsum"></span>
+   * // </div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   spanNotHasClass: PageObject.notHasClass('lorem', 'span')
+   * });
+   *
+   * assert.ok(page.spanNotHasClass);
+   *
+   * @public
+   *
+   * @param {string} cssClass - CSS class to be validated
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {boolean} options.multiple - Check if all elements matched by selector don't have the CSS class
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function notHasClass(cssClass, selector) {
+    var userOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(selector, options);
+
+          return (0, _emberCliPageObjectPrivateHelpers.every)(elements, function (element) {
+            return !element.hasClass(cssClass);
+          });
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/property', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.property = property;
+
+  /**
+   * @public
+   *
+   * Returns the value of a property from the matched element, or an array of
+   * values from multiple matched elements.
+   *
+   * @example
+   * // <input type="checkbox" checked="checked">
+   *
+   * const page = PageObject.create({
+   *   isChecked: PageObject.property('checked', 'input')
+   * });
+   *
+   * assert.ok(page.isChecked);
+   *
+   * @example
+   *
+   * // <input type="checkbox" checked="checked">
+   * // <input type="checkbox" checked="">
+   *
+   * const page = PageObject.create({
+   *   inputsChecked: PageObject.property('checked', 'input', { multiple: true })
+   * });
+   *
+   * assert.deepEqual(page.inputsChecked, [true, false]);
+   *
+   * @example
+   *
+   * // <div><input></div>
+   * // <div class="scope"><input type="checkbox" checked="checked"></div>
+   * // <div><input></div>
+   *
+   * const page = PageObject.create({
+   *   isChecked: PageObject.property('checked', 'input', { scope: '.scope' })
+   * });
+   *
+   * assert.ok(page.isChecked);
+   *
+   * @public
+   *
+   * @param {string} propertyName - Name of the property to get
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.multiple - If set, the function will return an array of values
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function property(propertyName, selector) {
+    var userOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(selector, options);
+          var result = undefined;
+
+          result = (0, _emberCliPageObjectPrivateHelpers.map)(elements, function (element) {
+            return element.prop(propertyName);
+          });
+
+          return options.multiple ? result : result[0];
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/text', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.text = text;
+
+  function identity(v) {
+    return v;
+  }
+
+  /**
+   * @public
+   *
+   * Returns text of the element or Array of texts of all matched elements by selector.
+   *
+   * @example
+   *
+   * // Hello <span>world!</span>
+   *
+   * const page = PageObject.create({
+   *   text: PageObject.text('span')
+   * });
+   *
+   * assert.equal(page.text, 'world!');
+   *
+   * @example
+   *
+   * // <span>lorem</span>
+   * // <span> ipsum </span>
+   * // <span>dolor</span>
+   *
+   * const page = PageObject.create({
+   *   texts: PageObject.text('span', { multiple: true })
+   * });
+   *
+   * assert.deepEqual(page.texts, ['lorem', 'ipsum', 'dolor']);
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope"><span>ipsum</span></div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   text: PageObject.text('span', { scope: '.scope' })
+   * });
+   *
+   * assert.equal(page.text, 'ipsum');
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope"><span>ipsum</span></div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   text: PageObject.text('span')
+   * });
+   *
+   * // returns 'ipsum'
+   * assert.equal(page.text, 'ipsum');
+   *
+   * @example
+   *
+   * // <div><span>lorem</span></div>
+   * // <div class="scope">
+   * //  ipsum
+   * // </div>
+   * // <div><span>dolor</span></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   text: PageObject.text('span', { normalize: false })
+   * });
+   *
+   * // returns 'ipsum'
+   * assert.equal(page.text, '\n ipsum\n');
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {boolean} options.multiple - Return an array of values
+   * @param {boolean} options.normalize - Set to `false` to avoid text normalization
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function text(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(selector, options);
+          var f = options.normalize === false ? identity : _emberCliPageObjectPrivateHelpers.normalizeText;
+
+          var result = (0, _emberCliPageObjectPrivateHelpers.map)(elements, function (element) {
+            return f(element.text());
+          });
+
+          return options.multiple ? result : result[0];
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/triggerable', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.triggerable = triggerable;
+
+  /**
+   *
+   * Triggers event on element matched by selector.
+   *
+   * @example
+   *
+   * // <input class="name">
+   * // <input class="email">
+   *
+   * const page = PageObject.create({
+   *   focus: triggerable('focus', '.name')
+   * });
+   *
+   * // focuses on element with selector '.name'
+   * page.focus();
+   *
+   * @example
+   *
+   * // <input class="name">
+   * // <input class="email">
+   *
+   * const page = PageObject.create({
+   *   enter: triggerable('keypress', '.name', { eventProperties: { keyCode: 13 } })
+   * });
+   *
+   * // triggers keypress using enter key on element with selector '.name'
+   * page.enter();
+   *
+   * @example
+   *
+   * // <div class="scope">
+   * //   <input class="name">
+   * // </div>
+   * // <input class="email">
+   *
+   * const page = PageObject.create({
+   *   focus: triggerable('focus', '.name', { scope: '.scope' })
+   * });
+   *
+   * // focuses on element with selector '.scope .name'
+   * page.focus();
+   *
+   * @example
+   *
+   * // <div class="scope">
+   * //   <input class="name">
+   * // </div>
+   * // <input class="email">
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   focus: triggerable('focus', '.name')
+   * });
+   *
+   * // clicks on element with selector '.scope button.continue'
+   * page.focus();
+   *
+   * @public
+   *
+   * @param {string} event - Event to be triggered
+   * @param {string} selector - CSS selector of the element on which the event will be triggered
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.resetScope - Ignore parent scope
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @param {String} options.eventProperties - Event properties that will be passed to trigger function
+   * @return {Descriptor}
+  */
+
+  function triggerable(event, selector) {
+    var userOptions = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        return function () {
+          var _this = this;
+
+          var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+          var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key + '()' }, userOptions);
+
+          return executionContext.runAsync(function (context) {
+            var fullSelector = (0, _emberCliPageObjectPrivateHelpers.buildSelector)(_this, selector, options);
+
+            context.assertElementExists(fullSelector, options);
+
+            context.triggerEvent(fullSelector, options.testContainer, event, options.eventProperties);
+          });
+        };
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/value', ['exports', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  exports.value = value;
+
+  /**
+   * @public
+   *
+   * Returns the value of a matched element, or an array of values of all matched elements.
+   *
+   * @example
+   *
+   * // <input value="Lorem ipsum">
+   *
+   * const page = PageObject.create({
+   *   value: PageObject.value('input')
+   * });
+   *
+   * assert.equal(page.value, 'Lorem ipsum');
+   *
+   * @example
+   *
+   * // <input value="lorem">
+   * // <input value="ipsum">
+   *
+   * const page = PageObject.create({
+   *   value: PageObject.value('input', { multiple: true })
+   * });
+   *
+   * assert.deepEqual(page.value, ['lorem', 'ipsum']);
+   *
+   * @example
+   *
+   * // <div><input value="lorem"></div>
+   * // <div class="scope"><input value="ipsum"></div>
+   *
+   * const page = PageObject.create({
+   *   value: PageObject.value('input', { scope: '.scope' })
+   * });
+   *
+   * assert.equal(page.value, 'ipsum');
+   *
+   * @example
+   *
+   * // <div><input value="lorem"></div>
+   * // <div class="scope"><input value="ipsum"></div>
+   *
+   * const page = PageObject.create({
+   *   scope: '.scope',
+   *   value: PageObject.value('input')
+   * });
+   *
+   * assert.equal(page.value, 'ipsum');
+   *
+   * @public
+   *
+   * @param {string} selector - CSS selector of the element to check
+   * @param {Object} options - Additional options
+   * @param {string} options.scope - Nests provided scope within parent's scope
+   * @param {boolean} options.resetScope - Override parent's scope
+   * @param {number} options.at - Reduce the set of matched elements to the one at the specified index
+   * @param {boolean} options.multiple - If set, the function will return an array of values
+   * @param {String} options.testContainer - Context where to search elements in the DOM
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if no element matches selector
+   * @throws Will throw an error if multiple elements are matched by selector and multiple option is not set
+   */
+
+  function value(selector) {
+    var userOptions = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+
+    return {
+      isDescriptor: true,
+
+      get: function get(key) {
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+        var options = (0, _emberCliPageObjectPrivateHelpers.assign)({ pageObjectKey: key }, userOptions);
+
+        return executionContext.run(function (context) {
+          var elements = context.findWithAssert(selector, options);
+          var result = undefined;
+
+          result = (0, _emberCliPageObjectPrivateHelpers.map)(elements, function (element) {
+            return element.val();
+          });
+
+          return options.multiple ? result : result[0];
+        });
+      }
+    };
+  }
+});
+define('ember-cli-page-object/-private/properties/visitable', ['exports', 'ember', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _ember, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  var _slicedToArray = (function () {
+    function sliceIterator(arr, i) {
+      var _arr = [];var _n = true;var _d = false;var _e = undefined;try {
+        for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+          _arr.push(_s.value);if (i && _arr.length === i) break;
+        }
+      } catch (err) {
+        _d = true;_e = err;
+      } finally {
+        try {
+          if (!_n && _i['return']) _i['return']();
+        } finally {
+          if (_d) throw _e;
+        }
+      }return _arr;
+    }return function (arr, i) {
+      if (Array.isArray(arr)) {
+        return arr;
+      } else if (Symbol.iterator in Object(arr)) {
+        return sliceIterator(arr, i);
+      } else {
+        throw new TypeError('Invalid attempt to destructure non-iterable instance');
+      }
+    };
+  })();
+
+  exports.visitable = visitable;
+
+  var $ = _ember['default'].$;
+
+  function fillInDynamicSegments(path, params) {
+    return path.split('/').map(function (segment) {
+      var match = segment.match(/^:(.+)$/);
+
+      if (match) {
+        var _match = _slicedToArray(match, 2);
+
+        var key = _match[1];
+
+        var value = params[key];
+
+        if (typeof value === 'undefined') {
+          throw new Error('Missing parameter for \'' + key + '\'');
+        }
+
+        // Remove dynamic segment key from params
+        delete params[key];
+
+        return value;
+      }
+
+      return segment;
+    }).join('/');
+  }
+
+  function appendQueryParams(path, queryParams) {
+    if (Object.keys(queryParams).length) {
+      path += '?' + $.param(queryParams);
+    }
+
+    return path;
+  }
+
+  /**
+   * @public
+   *
+   * Loads a given route.
+   *
+   * The resulting descriptor can be called with dynamic segments and parameters.
+   *
+   * @example
+   *
+   * const page = PageObject.create({
+   *   visit: PageObject.visitable('/users')
+   * });
+   *
+   * // visits '/users'
+   * page.visit();
+   *
+   * @example
+   *
+   * const page = PageObject.create({
+   *   visit: PageObject.visitable('/users/:user_id')
+   * });
+   *
+   * // visits '/users/10'
+   * page.visit({ user_id: 10 });
+   *
+   * @example
+   *
+   * const page = PageObject.create({
+   *   visit: PageObject.visitable('/users')
+   * });
+   *
+   * // visits '/users?name=john'
+   * page.visit({ name: 'john' });
+   *
+   * @example
+   *
+   * const page = PageObject.create({
+   *   visit: PageObject.visitable('/users/:user_id')
+   * });
+   *
+   * // visits '/users/1?name=john'
+   * page.visit({ user_id: 1, name: 'john' });
+   *
+   * @param {string} path - Full path of the route to visit
+   * @return {Descriptor}
+   *
+   * @throws Will throw an error if dynamic segments are not filled
+   */
+
+  function visitable(path) {
+    return {
+      isDescriptor: true,
+
+      value: function value() {
+        var dynamicSegmentsAndQueryParams = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+        var executionContext = (0, _emberCliPageObjectPrivateExecution_context.getExecutionContext)(this);
+
+        executionContext.run(function (context) {
+          var params = (0, _emberCliPageObjectPrivateHelpers.assign)({}, dynamicSegmentsAndQueryParams);
+          var fullPath = fillInDynamicSegments(path, params);
+
+          fullPath = appendQueryParams(fullPath, params);
+
+          context.visit(fullPath);
+        });
+
+        return this;
+      }
+    };
+  }
+});
+define('ember-cli-page-object/extend', ['exports', 'ember-cli-page-object/-private/extend/find-element', 'ember-cli-page-object/-private/extend/find-element-with-assert', 'ember-cli-page-object/-private/helpers', 'ember-cli-page-object/-private/execution_context'], function (exports, _emberCliPageObjectPrivateExtendFindElement, _emberCliPageObjectPrivateExtendFindElementWithAssert, _emberCliPageObjectPrivateHelpers, _emberCliPageObjectPrivateExecution_context) {
+  'use strict';
+
+  Object.defineProperty(exports, 'findElement', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateExtendFindElement.findElement;
+    }
+  });
+  Object.defineProperty(exports, 'findElementWithAssert', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateExtendFindElementWithAssert.findElementWithAssert;
+    }
+  });
+  Object.defineProperty(exports, 'buildSelector', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateHelpers.buildSelector;
+    }
+  });
+  Object.defineProperty(exports, 'getContext', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateHelpers.getContext;
+    }
+  });
+  Object.defineProperty(exports, 'registerExecutionContext', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateExecution_context.register;
+    }
+  });
+});
+define('ember-cli-page-object/index', ['exports', 'ember-cli-page-object/-private/create', 'ember-cli-page-object/-private/properties/attribute', 'ember-cli-page-object/-private/properties/click-on-text', 'ember-cli-page-object/-private/properties/clickable', 'ember-cli-page-object/-private/properties/collection', 'ember-cli-page-object/-private/properties/contains', 'ember-cli-page-object/-private/properties/count', 'ember-cli-page-object/-private/properties/fillable', 'ember-cli-page-object/-private/properties/has-class', 'ember-cli-page-object/-private/properties/is', 'ember-cli-page-object/-private/properties/is-hidden', 'ember-cli-page-object/-private/properties/is-visible', 'ember-cli-page-object/-private/properties/not-has-class', 'ember-cli-page-object/-private/properties/property', 'ember-cli-page-object/-private/properties/text', 'ember-cli-page-object/-private/properties/triggerable', 'ember-cli-page-object/-private/properties/value', 'ember-cli-page-object/-private/properties/visitable', 'ember-cli-page-object/-private/extend/find-element', 'ember-cli-page-object/-private/extend/find-element-with-assert', 'ember-cli-page-object/-private/helpers'], function (exports, _emberCliPageObjectPrivateCreate, _emberCliPageObjectPrivatePropertiesAttribute, _emberCliPageObjectPrivatePropertiesClickOnText, _emberCliPageObjectPrivatePropertiesClickable, _emberCliPageObjectPrivatePropertiesCollection, _emberCliPageObjectPrivatePropertiesContains, _emberCliPageObjectPrivatePropertiesCount, _emberCliPageObjectPrivatePropertiesFillable, _emberCliPageObjectPrivatePropertiesHasClass, _emberCliPageObjectPrivatePropertiesIs, _emberCliPageObjectPrivatePropertiesIsHidden, _emberCliPageObjectPrivatePropertiesIsVisible, _emberCliPageObjectPrivatePropertiesNotHasClass, _emberCliPageObjectPrivatePropertiesProperty, _emberCliPageObjectPrivatePropertiesText, _emberCliPageObjectPrivatePropertiesTriggerable, _emberCliPageObjectPrivatePropertiesValue, _emberCliPageObjectPrivatePropertiesVisitable, _emberCliPageObjectPrivateExtendFindElement, _emberCliPageObjectPrivateExtendFindElementWithAssert, _emberCliPageObjectPrivateHelpers) {
+  'use strict';
+
+  exports.create = _emberCliPageObjectPrivateCreate.create;
+  exports.attribute = _emberCliPageObjectPrivatePropertiesAttribute.attribute;
+  exports.clickOnText = _emberCliPageObjectPrivatePropertiesClickOnText.clickOnText;
+  exports.clickable = _emberCliPageObjectPrivatePropertiesClickable.clickable;
+  exports.collection = _emberCliPageObjectPrivatePropertiesCollection.collection;
+  exports.contains = _emberCliPageObjectPrivatePropertiesContains.contains;
+  exports.count = _emberCliPageObjectPrivatePropertiesCount.count;
+  exports.fillable = _emberCliPageObjectPrivatePropertiesFillable.fillable;
+  var selectable = _emberCliPageObjectPrivatePropertiesFillable.fillable;exports.selectable = selectable;
+  exports.hasClass = _emberCliPageObjectPrivatePropertiesHasClass.hasClass;
+  exports.is = _emberCliPageObjectPrivatePropertiesIs.is;
+  exports.isHidden = _emberCliPageObjectPrivatePropertiesIsHidden.isHidden;
+  exports.isVisible = _emberCliPageObjectPrivatePropertiesIsVisible.isVisible;
+  exports.notHasClass = _emberCliPageObjectPrivatePropertiesNotHasClass.notHasClass;
+  exports.property = _emberCliPageObjectPrivatePropertiesProperty.property;
+  exports.text = _emberCliPageObjectPrivatePropertiesText.text;
+  exports.triggerable = _emberCliPageObjectPrivatePropertiesTriggerable.triggerable;
+  exports.value = _emberCliPageObjectPrivatePropertiesValue.value;
+  exports.visitable = _emberCliPageObjectPrivatePropertiesVisitable.visitable;
+  Object.defineProperty(exports, 'findElement', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateExtendFindElement.findElement;
+    }
+  });
+  Object.defineProperty(exports, 'findElementWithAssert', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateExtendFindElementWithAssert.findElementWithAssert;
+    }
+  });
+  Object.defineProperty(exports, 'buildSelector', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateHelpers.buildSelector;
+    }
+  });
+  Object.defineProperty(exports, 'getContext', {
+    enumerable: true,
+    get: function get() {
+      return _emberCliPageObjectPrivateHelpers.getContext;
+    }
+  });
+  exports['default'] = {
+    attribute: _emberCliPageObjectPrivatePropertiesAttribute.attribute,
+    clickOnText: _emberCliPageObjectPrivatePropertiesClickOnText.clickOnText,
+    clickable: _emberCliPageObjectPrivatePropertiesClickable.clickable,
+    collection: _emberCliPageObjectPrivatePropertiesCollection.collection,
+    contains: _emberCliPageObjectPrivatePropertiesContains.contains,
+    count: _emberCliPageObjectPrivatePropertiesCount.count,
+    create: _emberCliPageObjectPrivateCreate.create,
+    fillable: _emberCliPageObjectPrivatePropertiesFillable.fillable,
+    hasClass: _emberCliPageObjectPrivatePropertiesHasClass.hasClass,
+    is: _emberCliPageObjectPrivatePropertiesIs.is,
+    isHidden: _emberCliPageObjectPrivatePropertiesIsHidden.isHidden,
+    isVisible: _emberCliPageObjectPrivatePropertiesIsVisible.isVisible,
+    notHasClass: _emberCliPageObjectPrivatePropertiesNotHasClass.notHasClass,
+    property: _emberCliPageObjectPrivatePropertiesProperty.property,
+    selectable: selectable,
+    text: _emberCliPageObjectPrivatePropertiesText.text,
+    value: _emberCliPageObjectPrivatePropertiesValue.value,
+    visitable: _emberCliPageObjectPrivatePropertiesVisitable.visitable,
+    triggerable: _emberCliPageObjectPrivatePropertiesTriggerable.triggerable
+  };
 });
 define("ember-data/-private/adapters", ["exports", "ember-data/adapters/json-api", "ember-data/adapters/rest"], function (exports, _emberDataAdaptersJsonApi, _emberDataAdaptersRest) {
   /**
