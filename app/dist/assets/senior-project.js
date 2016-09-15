@@ -258,11 +258,11 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
             "source": null,
             "start": {
               "line": 1,
-              "column": 137
+              "column": 179
             },
             "end": {
               "line": 1,
-              "column": 183
+              "column": 241
             }
           },
           "moduleName": "senior-project/pods/event/template.hbs"
@@ -274,6 +274,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
         buildFragment: function buildFragment(dom) {
           var el0 = dom.createDocumentFragment();
           var el1 = dom.createElement("p");
+          dom.setAttribute(el1, "class", "players");
           var el2 = dom.createComment("");
           dom.appendChild(el1, el2);
           dom.appendChild(el0, el1);
@@ -284,7 +285,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
           morphs[0] = dom.createMorphAt(dom.childAt(fragment, [0]), 0, 0);
           return morphs;
         },
-        statements: [["content", "player", ["loc", [null, [1, 169], [1, 179]]]]],
+        statements: [["content", "player", ["loc", [null, [1, 227], [1, 237]]]]],
         locals: ["player"],
         templates: []
       };
@@ -292,8 +293,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
     return {
       meta: {
         "fragmentReason": {
-          "name": "missing-wrapper",
-          "problems": ["wrong-type", "multiple-nodes"]
+          "name": "triple-curlies"
         },
         "revision": "Ember@2.5.1",
         "loc": {
@@ -304,7 +304,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
           },
           "end": {
             "line": 1,
-            "column": 202
+            "column": 266
           }
         },
         "moduleName": "senior-project/pods/event/template.hbs"
@@ -315,30 +315,32 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
       hasRendered: false,
       buildFragment: function buildFragment(dom) {
         var el0 = dom.createDocumentFragment();
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createElement("button");
-        var el2 = dom.createTextNode("Add a player");
+        var el1 = dom.createElement("div");
+        dom.setAttribute(el1, "class", "event-page");
+        var el2 = dom.createComment("");
         dom.appendChild(el1, el2);
-        dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
-        dom.appendChild(el0, el1);
-        var el1 = dom.createComment("");
+        var el2 = dom.createElement("button");
+        var el3 = dom.createTextNode("Add a player");
+        dom.appendChild(el2, el3);
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
+        var el2 = dom.createComment("");
+        dom.appendChild(el1, el2);
         dom.appendChild(el0, el1);
         return el0;
       },
       buildRenderNodes: function buildRenderNodes(dom, fragment, contextualElement) {
-        var element0 = dom.childAt(fragment, [1]);
+        var element0 = dom.childAt(fragment, [0]);
+        var element1 = dom.childAt(element0, [1]);
         var morphs = new Array(4);
-        morphs[0] = dom.createMorphAt(fragment, 0, 0, contextualElement);
-        morphs[1] = dom.createElementMorph(element0);
-        morphs[2] = dom.createMorphAt(fragment, 2, 2, contextualElement);
-        morphs[3] = dom.createMorphAt(fragment, 3, 3, contextualElement);
-        dom.insertBoundary(fragment, 0);
-        dom.insertBoundary(fragment, null);
+        morphs[0] = dom.createMorphAt(element0, 0, 0);
+        morphs[1] = dom.createElementMorph(element1);
+        morphs[2] = dom.createMorphAt(element0, 2, 2);
+        morphs[3] = dom.createMorphAt(element0, 3, 3);
         return morphs;
       },
-      statements: [["inline", "input", [], ["type", "text", "value", ["subexpr", "@mut", [["get", "playerName", ["loc", [null, [1, 26], [1, 36]]]]], [], []], "placeHolder", "Enter a player's name"], ["loc", [null, [1, 0], [1, 74]]]], ["element", "action", ["addPlayer"], ["on", "click"], ["loc", [null, [1, 82], [1, 115]]]], ["block", "each", [["get", "players", ["loc", [null, [1, 145], [1, 152]]]]], [], 0, null, ["loc", [null, [1, 137], [1, 192]]]], ["content", "outlet", ["loc", [null, [1, 192], [1, 202]]]]],
+      statements: [["inline", "input.player-name-input", [], ["type", "text", "value", ["subexpr", "@mut", [["get", "playerName", ["loc", [null, [1, 68], [1, 78]]]]], [], []], "placeholder", "Enter a player's name"], ["loc", [null, [1, 24], [1, 116]]]], ["element", "action", ["addPlayer"], ["on", "click"], ["loc", [null, [1, 124], [1, 157]]]], ["block", "each", [["get", "players", ["loc", [null, [1, 187], [1, 194]]]]], [], 0, null, ["loc", [null, [1, 179], [1, 250]]]], ["content", "outlet", ["loc", [null, [1, 250], [1, 260]]]]],
       locals: [],
       templates: [child0]
     };
@@ -455,7 +457,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+4256109c"});
+  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+847fe51a"});
 }
 
 /* jshint ignore:end */
