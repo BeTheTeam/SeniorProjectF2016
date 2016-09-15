@@ -3,18 +3,12 @@
 describe "Integration: EventPage", ->
   before ->
     @page = page
-
   beforeEach ->
     @page.visit()
 
   describe "adding players", ->
-
-    it "can add a new player", ->
+    it "can add a new player, and clears the text input", ->
       expect(@page.numPlayers).to.equal 3
-
       @page.setPlayerName('Derp')
-      @page.addPlayer()
+      expect(@page.numPlayers).to.equal 4
 
-      andThen =>
-        expect(@page.numPlayers).to.equal 4
-        expect(@page.playerInputValue)
