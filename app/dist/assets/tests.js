@@ -129,7 +129,12 @@ define("senior-project/tests/integration/event/event-test", ["exports", "senior-
       return it("can add a new player", function () {
         expect(this.page.numPlayers).to.equal(3);
         this.page.setPlayerName('Derp');
-        return expect(this.page.numPlayers).to.equal(4);
+        this.page.addPlayer();
+        return andThen((function (_this) {
+          return function () {
+            return expect(_this.page.numPlayers).to.equal(4);
+          };
+        })(this));
       });
     });
   });
