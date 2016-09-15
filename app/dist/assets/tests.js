@@ -126,7 +126,7 @@ define("senior-project/tests/integration/event/event-test", ["exports", "senior-
       return this.page.visit();
     });
     return describe("adding players", function () {
-      return it("can add a new player, and clears the text input", function () {
+      return it("can add a new player", function () {
         expect(this.page.numPlayers).to.equal(3);
         this.page.setPlayerName('Derp');
         return expect(this.page.numPlayers).to.equal(4);

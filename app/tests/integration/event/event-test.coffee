@@ -7,8 +7,10 @@ describe "Integration: EventPage", ->
     @page.visit()
 
   describe "adding players", ->
-    it "can add a new player, and clears the text input", ->
-      expect(@page.numPlayers).to.equal 3
-      @page.setPlayerName('Derp')
-      expect(@page.numPlayers).to.equal 4
 
+    it "can add a new player", ->
+      expect(@page.numPlayers).to.equal 3
+
+      @page.setPlayerName('Derp')
+
+      expect(@page.numPlayers).to.equal 4
