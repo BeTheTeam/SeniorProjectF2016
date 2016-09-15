@@ -132,7 +132,8 @@ define("senior-project/tests/integration/event/event-test", ["exports", "senior-
         this.page.addPlayer();
         return andThen((function (_this) {
           return function () {
-            return expect(_this.page.numPlayers).to.equal(4);
+            expect(_this.page.numPlayers).to.equal(4);
+            return expect(_this.page.playerInputValue);
           };
         })(this));
       });
@@ -206,14 +207,15 @@ define('senior-project/tests/page-object', ['exports', 'ember-cli-page-object'],
   });
 });
 define('senior-project/tests/pages/event', ['exports', 'ember-cli-page-object'], function (exports, _emberCliPageObject) {
-  var EventPage, clickable, collection, count, fillable, isHidden, visitable;
+  var EventPage, clickable, collection, count, fillable, isHidden, value, visitable;
 
-  collection = _emberCliPageObject['default'].collection, visitable = _emberCliPageObject['default'].visitable, clickable = _emberCliPageObject['default'].clickable, isHidden = _emberCliPageObject['default'].isHidden, count = _emberCliPageObject['default'].count, fillable = _emberCliPageObject['default'].fillable;
+  collection = _emberCliPageObject['default'].collection, visitable = _emberCliPageObject['default'].visitable, clickable = _emberCliPageObject['default'].clickable, isHidden = _emberCliPageObject['default'].isHidden, count = _emberCliPageObject['default'].count, fillable = _emberCliPageObject['default'].fillable, value = _emberCliPageObject['default'].value;
 
   EventPage = _emberCliPageObject['default'].create({
     visit: visitable('/event'),
-    addPlayer: clickable('.player-add'),
+    addPlayer: clickable('.add-player'),
     setPlayerName: fillable('.player-name-input'),
+    playerInputValue: value('.player-name-input'),
     numPlayers: count('.players'),
     players: collection({
       itemScope: '.players'

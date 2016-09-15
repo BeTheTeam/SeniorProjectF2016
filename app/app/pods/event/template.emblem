@@ -1,6 +1,6 @@
 .event-page
-	= input.player-name-input type="text" value=playerName placeholder="Enter a player's name"
-	button click="addPlayer" Add a player
+	= input class="player-name-input" type="text" value=playerName placeholder="Enter a player's name"
+	button.add-player click="addPlayer" Add a player
 
 	each players as |player|
 	  p.players = player

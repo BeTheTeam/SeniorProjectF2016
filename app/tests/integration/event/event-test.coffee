@@ -17,3 +17,4 @@ describe "Integration: EventPage", ->
 
       andThen =>
         expect(@page.numPlayers).to.equal 4
+        expect(@page.playerInputValue)

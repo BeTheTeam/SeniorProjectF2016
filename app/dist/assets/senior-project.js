@@ -258,11 +258,11 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
             "source": null,
             "start": {
               "line": 1,
-              "column": 179
+              "column": 206
             },
             "end": {
               "line": 1,
-              "column": 241
+              "column": 268
             }
           },
           "moduleName": "senior-project/pods/event/template.hbs"
@@ -285,7 +285,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
           morphs[0] = dom.createMorphAt(dom.childAt(fragment, [0]), 0, 0);
           return morphs;
         },
-        statements: [["content", "player", ["loc", [null, [1, 227], [1, 237]]]]],
+        statements: [["content", "player", ["loc", [null, [1, 254], [1, 264]]]]],
         locals: ["player"],
         templates: []
       };
@@ -304,7 +304,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
           },
           "end": {
             "line": 1,
-            "column": 266
+            "column": 293
           }
         },
         "moduleName": "senior-project/pods/event/template.hbs"
@@ -320,6 +320,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
         var el2 = dom.createComment("");
         dom.appendChild(el1, el2);
         var el2 = dom.createElement("button");
+        dom.setAttribute(el2, "class", "add-player");
         var el3 = dom.createTextNode("Add a player");
         dom.appendChild(el2, el3);
         dom.appendChild(el1, el2);
@@ -340,7 +341,7 @@ define("senior-project/pods/event/template", ["exports"], function (exports) {
         morphs[3] = dom.createMorphAt(element0, 3, 3);
         return morphs;
       },
-      statements: [["inline", "input.player-name-input", [], ["type", "text", "value", ["subexpr", "@mut", [["get", "playerName", ["loc", [null, [1, 68], [1, 78]]]]], [], []], "placeholder", "Enter a player's name"], ["loc", [null, [1, 24], [1, 116]]]], ["element", "action", ["addPlayer"], ["on", "click"], ["loc", [null, [1, 124], [1, 157]]]], ["block", "each", [["get", "players", ["loc", [null, [1, 187], [1, 194]]]]], [], 0, null, ["loc", [null, [1, 179], [1, 250]]]], ["content", "outlet", ["loc", [null, [1, 250], [1, 260]]]]],
+      statements: [["inline", "input", [], ["type", "text", "value", ["subexpr", "@mut", [["get", "playerName", ["loc", [null, [1, 50], [1, 60]]]]], [], []], "placeholder", "Enter a player's name", "class", "player-name-input"], ["loc", [null, [1, 24], [1, 124]]]], ["element", "action", ["addPlayer"], ["on", "click"], ["loc", [null, [1, 132], [1, 165]]]], ["block", "each", [["get", "players", ["loc", [null, [1, 214], [1, 221]]]]], [], 0, null, ["loc", [null, [1, 206], [1, 277]]]], ["content", "outlet", ["loc", [null, [1, 277], [1, 287]]]]],
       locals: [],
       templates: [child0]
     };
@@ -457,7 +458,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+4256109c"});
+  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+847fe51a"});
 }
 
 /* jshint ignore:end */
