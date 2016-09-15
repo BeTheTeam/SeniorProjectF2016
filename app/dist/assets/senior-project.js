@@ -457,7 +457,7 @@ catch(err) {
 /* jshint ignore:start */
 
 if (!runningTests) {
-  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+847fe51a"});
+  require("senior-project/app")["default"].create({"name":"senior-project","version":"0.0.0+4256109c"});
 }
 
 /* jshint ignore:end */
