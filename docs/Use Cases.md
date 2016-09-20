@@ -21,3 +21,11 @@ Assumed at this point:
 ### During the Event
 - Organizer is able to see the list of players in each heat
 - Organizer is able to see the list of players that joined Shot put and Long jump
+
+### Meet Creation
+
+![Meet Creation Use Case](images/meetCreationUseCase.PNG)
+
+### Request Heat
+
+![Request Heat Use Case](images/requestHeat.PNG)
