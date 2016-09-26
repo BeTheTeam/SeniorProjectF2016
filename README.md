@@ -1,6 +1,7 @@
 # [Great App, To Be Named Later]
 Big Data Meets High School Sports
 ---
+Current build status: [![CircleCI](https://circleci.com/gh/BeTheTeam/SeniorProjectF2016.svg?style=svg&circle-token=e9b6dc107e9b20d0aec8cb27e56f0286158b50d9)](https://circleci.com/gh/BeTheTeam/SeniorProjectF2016)
 
 ![Don't Hate, Commit Today] (https://media.giphy.com/media/2vMrgEYhV5BcY/giphy.gif)
 
