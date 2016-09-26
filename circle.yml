@@ -6,6 +6,8 @@ machine:
 
 dependencies:
   pre:
+    - npm install -g bower
+    - npm install -g gulp
     - bower install 
 general:
   build_dir: app
