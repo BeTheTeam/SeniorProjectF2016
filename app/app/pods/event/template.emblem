@@ -1,7 +1,16 @@
 .event-page
-  = input class="player-name-input" type="text" value=playerName placeholder="Enter a player's name"
-  button.add-player click="addPlayer" Add a player
-  
-  each players as |player|
-    p.players = player
-  = outlet
+  .flex-container
+    .player-container
+      h2 Players
+      = input class="player-name-input" type="text" value=playerName placeholder="Enter a player's name" action="addPlayer"
+      button.add-player click="addPlayer" Add a player
+
+      each players as |player|
+        p.players = player
+    .heat-container
+      h2 Heats
+      button.generate-heats click="generateHeats" Generate Heats
+      each heats as |heat|
+        h3.heat heat
+        each heat as |player|
+          p.heat-player = player

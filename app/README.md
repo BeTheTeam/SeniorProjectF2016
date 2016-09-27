@@ -1,4 +1,5 @@
 # Senior-project
+Current build status: [![CircleCI](https://circleci.com/gh/BeTheTeam/SeniorProjectF2016.svg?style=svg&circle-token=e9b6dc107e9b20d0aec8cb27e56f0286158b50d9)](https://circleci.com/gh/BeTheTeam/SeniorProjectF2016)
 
 This README outlines the details of collaborating on this Ember application.
 A short introduction of this app could easily go here.
