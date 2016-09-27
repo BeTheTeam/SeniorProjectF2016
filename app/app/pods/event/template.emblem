@@ -7,6 +7,7 @@
 
       each players as |player|
         p.players = player
+        button.remove click="removePlayer" Remove
     .heat-container
       h2 Heats
       button.generate-heats click="generateHeats" Generate Heats

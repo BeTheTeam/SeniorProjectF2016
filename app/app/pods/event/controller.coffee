@@ -12,6 +12,11 @@ EventController = Ember.Controller.extend
       @model.pushObject @playerName
       @set('playerName', "")
 
+    removePlayer: ->
+      # Find the 'index' of this button
+
+
+
     generateHeats: ->
       #TODO This can probably be done with a nice functional solution
       numHeats = @get('players').length//@heatSize
