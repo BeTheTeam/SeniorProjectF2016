@@ -9,7 +9,10 @@
         p.players = player
     .heat-container
       h2 Heats
+      = input class="heat-size-input" type="text" value=heatSize placeholder="Number of Players in a Heat"
+      = input class="heat-number-input" type="text" value=numOfHeats placeholder="Number of Heats"
       button.generate-heats click="generateHeats" Generate Heats
+      button.generate-number-of-heats click="generateNumberOfHeats" Generate Number Of Heats
       each heats as |heat|
         h3.heat heat
         each heat as |player|
