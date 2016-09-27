@@ -14,15 +14,15 @@ describe "Integration: EventPage", ->
 
   describe "adding players", ->
     it "can add a new player", ->
-      expect(@page.numPlayers).to.equal 3
+      expect(@page.players().toArray().length).to.equal 3
 
       @addPlayer("derp")
 
       andThen =>
-        expect(@page.numPlayers).to.equal 4
+        expect(@page.players().toArray().length).to.equal 4
         expect(@page.playerInputValue).to.equal ""
 
-  describe.only "adding heats", ->
+  describe "adding heats", ->
     it "can generate basic heats", ->
       expect(@page.heats().toArray().length).to.equal 0
 
@@ -35,3 +35,15 @@ describe "Integration: EventPage", ->
         expect(@page.heats().toArray().length).to.equal 2
         expect(@page.heatsPlayers().toArray().length).to.equal 6
         #TODO Expect unique players for the heats
+
+  # dependent on previous test until we can figure out how to reset the model/controller
+  describe "dynamic number of players per heat", ->
+    it "changes number of players per heat", ->
+      expect(@page.heats().toArray().length).to.equal 2
+
+      @page.setHeatSize(2)
+      @page.generateHeats()
+
+      andThen =>
+        expect(@page.heats().toArray().length).to.equal 3
+        expect(@page.heatsPlayers().toArray().length).to.equal 6

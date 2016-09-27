@@ -8,6 +8,7 @@ EventPage = PageObject.create
   generateHeats: clickable('.generate-heats')
   setPlayerName: fillable('.player-name-input')
   playerInputValue: value('.player-name-input')
+  setHeatSize: fillable('.heat-size-input')
 
   players: collection
     itemScope: '.players'
