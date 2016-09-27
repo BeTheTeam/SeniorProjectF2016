@@ -6,6 +6,7 @@ EventController = Ember.Controller.extend
   players: Ember.computed.alias 'model'
   heats: undefined
   heatSize: 3
+  numOfHeats: 3
 
   actions:
     addPlayer: ->
@@ -29,6 +30,21 @@ EventController = Ember.Controller.extend
         tempHeats.push(singleHeat)
       @set('heats', tempHeats)
 
+    generateNumberOfHeats: ->
+      numHeatsPossible = @get('players').length//@heatSize
+      console.log('numHeatsPossible: ' + numHeatsPossible)
+      console.log('numOfHeats: ' + @numOfHeats)
+      # Defaults to number of heats possible with the given heat size
+      if numOfHeats < numHeatsPossible
+        numOfHeats = numHeatsPossible
 
+      shuffledPlayers = _.shuffle(@.get('players'))
+      tempHeats = []
+      for i in [0...@numOfHeats]
+        singleHeat = []
+        for j in [0...@heatSize]
+          singleHeat.push shuffledPlayers[(@heatSize*i)+j]
+        tempHeats.push(singleHeat)
+      @set('heats', tempHeats)
 
 `export default EventController`

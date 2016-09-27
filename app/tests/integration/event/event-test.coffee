@@ -45,3 +45,26 @@ describe "Integration: EventPage", ->
 
       andThen =>
         expect(@page.players().toArray().length).to.equal 1
+
+  # dependent on previous test until we can figure out how to reset the model/controller
+  describe "dynamic number of players per heat", ->
+    it "changes number of players per heat", ->
+      expect(@page.heats().toArray().length).to.equal 2
+
+      @page.setHeatSize(2)
+      @page.generateHeats()
+
+      andThen =>
+        expect(@page.heats().toArray().length).to.equal 3
+        expect(@page.heatsPlayers().toArray().length).to.equal 6
+
+  # yet again, this test depends on the previous one because of the reset thing
+  describe "dynamic number of heats", ->
+    it "generates a specified number of heats", ->
+      expect(@page.heats().toArray().length).to.equal 3
+
+      @page.setNumberOfHeats(2)
+      @page.generateNumberOfHeats()
+
+      andThen =>
+        expect(@page.heats().toArray().length).to.equal 2
