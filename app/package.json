@@ -46,5 +46,8 @@
     "ember-resolver": "^2.0.3",
     "loader.js": "^4.0.1",
     "lodash": "4.16.0"
+  },
+  "dependencies": {
+    "ember-font-awesome": "^2.2.0"
   }
 }
