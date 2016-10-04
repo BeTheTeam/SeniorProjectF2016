@@ -13,6 +13,10 @@ App = Ember.Application.extend({
   Resolver
 });
 
+Ember.LinkComponent.reopen({
+  activeClass: 'is-active'
+});
+
 loadInitializers(App, config.modulePrefix);
 
 // Initialize Firebase
