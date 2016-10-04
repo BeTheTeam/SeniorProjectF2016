@@ -1,29 +1,25 @@
 <nav class="nav has-shadow">
-  <div class="container columns">
-    <div class="column is-10 is-offset-1">
-      <div class="nav">
-        <div class="nav-left">
-          <a class="nav-item is-brand" href="#">
-            <h1 class="title is-3" id="title">BETHE.TEAM</h1>
-          </a>
-        </div>
+  <div class="column is-10 is-offset-1 p-a-0">
+    <div class="nav">
+      <div class="nav-left">
+        <a class="nav-item is-brand" href="#">
+          <h1 class="title is-3" id="title">BETHE.TEAM</h1>
+        </a>
+      </div>
 
-        <span class="nav-toggle">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
+      <span class="nav-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
 
-        <div class="nav-right nav-menu">
-          {{link-to "Home" "index" class="nav-item"}}
-          {{link-to "Events" "event" class="nav-item"}}
-        </div>
+      <div class="nav-right nav-menu">
+        {{link-to "Home" "index" class="nav-item"}}
+        {{link-to "Events" "event" class="nav-item"}}
       </div>
     </div>
   </div>
 </nav>
-<div class="container columns">
-  <div class="column is-10 is-offset-1">
-    {{outlet}}
-  </div>
+<div class="column is-10 is-offset-1  p-a-0">
+  {{outlet}}
 </div>

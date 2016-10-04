@@ -21,7 +21,7 @@ section class="hero is-primary is-bold"
             td.has-text-right
         tr.new-player
           td
-            = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" action="addPlayer"
+            = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" enter="addPlayer"
           td.has-text-right
             button.button.is-primary.add-player click="addPlayer" Add a player
 
