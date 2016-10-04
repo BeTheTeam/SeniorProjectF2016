@@ -4,15 +4,15 @@
 **Software Platforms Chosen for Project**
 
   - Ember.js
-      - Open-source JavaScript Webframework that is readily available at no cost, is easy to install, and allows scalable, web applications to be built.
+      - Open-source JavaScript Web framework that is readily available at no cost, is easy to install, and allows scalable, web applications to be built.
       - Lots of help available online and two of our group members have used Ember.js, with one of them using it on a daily basis.
       - Low-risk
   - Coffee Script
-      - Short hand programming language that complies itself into JavaScript without the user having to worry about format and puntation as much.
+      - Short hand programming language that complies itself into JavaScript without the user having to worry about format and punctuation as much.
       - Many user guides and examples online and it is easily and quickly learned.
       - Low-risk
   - Slack
-      - Communication App that is connectable to Github
+      - Communication App that is connectable to GitHub
       - Allows team communication at any time and notifies the entire team when a commit is made on GitHub
       - Low-risk
   - Trello
@@ -36,22 +36,33 @@
       - The final iteration will be a dry run for the actual presentation
       - Low-risk
   - Project Goals
-      - Assist team organizers to set up competitions
-      - Allow coaches to record student performances
-      - Allow students to track there progress
+      - Allow Organizers to set up competitions
+      - Allow Coaches to record student performances
+      - Allow Players to track their progress
+      - Allow Scouts to track player and team progress and to view upcoming events
       - Focus on Track heats with the possibility of expanding to other sports
       - User-friendly Website
       - Low-risk on most goals, with the exception of medium-risk for expanding to other sports
 
-**Tasks for this Week**
+**Tasks**
 
   - Download Programs
-      - Installed all necessary applications on each team members computer
-      - Medium-risk due to some members running Windows 10, Linux, and Mac OSX
-  - Begin to add functionality to website
+      - Install all necessary applications on each team member's computer and phone
+      - Medium-risk due to some members running Windows 10, Linux, or Mac OSX on their computers and Android or IOS on their phones
+  - Add functionality to website
       - Function to add players to a team
+      - Function to remove players from a team
       - Function to display all members on a team
-      - Low-risk
-  -  Begin Backbone of project
-      - Began coding the set-up of how our website will function 
-      - Medium-risk because the website layout and functionality have to be somewhat known
+      - Function to display events a team is registered for
+      - Function to register for an event
+      - Function to take notes on a team member
+      - Function to enter and view player stats
+      - Function to enter and view team stats
+      - Function to enter and view event results
+      - Function to setup events
+      - Function to setup mini events, with rules and description
+      - Medium-risk to High-risk because we need to write and test code for each function
+  -  Backbone of project
+      - Coding the set-up of how our website will function 
+      - Adding a user-friendly User Interface
+      - Medium-risk to High-risk because the website layout and functionality have to be based on our initial designs and have to be tested
