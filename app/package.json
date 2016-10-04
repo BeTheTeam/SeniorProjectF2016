@@ -43,6 +43,7 @@
     "ember-load-initializers": "^0.5.1",
     "ember-lodash": "0.0.10",
     "ember-resolver": "^2.0.3",
+    "firebase": "^3.4.1",
     "loader.js": "^4.0.1",
     "lodash": "4.16.0"
   }
