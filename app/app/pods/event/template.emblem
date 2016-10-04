@@ -1,19 +1,57 @@
-.event-page
-  .flex-container
-    .player-container
-      h2 Players
-      = input class="player-name-input" type="text" value=playerName placeholder="Enter a player's name" action="addPlayer"
-      button.add-player click="addPlayer" Add a player
+section class="hero is-primary is-bold"
+  .hero-body
+    .container.has-text-centered
+      h2 class="title is-2" Events
+.player-container.section
+  .container
+    .heading.has-text-centered
+      h3 class="title is-3"
+        i.fa.fa-user
+        "Players
+    table class="table roster"
+      thead
+        tr
+          th Player Name
+          th
+      tbody
+        each players as |player|
+          tr.player
+            td = player
+            td.has-text-right
+        tr.new-player
+          td
+            = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" enter="addPlayer"
+          td.has-text-right
+            button.button.is-primary.add-player click="addPlayer" Add a player
 
-      each players as |player|
-        p.players = player
-    .heat-container
-      h2 Heats
-      = input class="heat-size-input" type="text" value=heatSize placeholder="Number of Players in a Heat"
-      = input class="heat-number-input" type="text" value=numOfHeats placeholder="Number of Heats"
-      button.generate-heats click="generateHeats" Generate Heats
-      button.generate-number-of-heats click="generateNumberOfHeats" Generate Number Of Heats
-      each heats as |heat|
-        h3.heat heat
-        each heat as |player|
-          p.heat-player = player
+.heat-container.section
+  .container
+    .heading.has-text-centered
+        h3 class="title is-3"
+          i.fa.fa-fire
+          "Heats
+        .columns
+          .column
+            label.label Number of Players in a Heat
+            = input class="heat-size-input input" type="text" value=heatSize placeholder="Number of Players in a Heat"
+          .column
+            label.label Number of Heats
+            = input class="heat-number-input input" type="text" value=numOfHeats placeholder="Number of Heats"
+        .columns
+          .column
+            button.button.is-primary.generate-heats click="generateHeats" Generate Heats
+          .column
+            button.button.is-primary.generate-number-of-heats click="generateNumberOfHeats" Generate Number Of Heats
+    each heats as |heat hi|
+      .section.heat
+        .heading.has-text-centered
+          h3.title.is-4
+            "Heat {{hi}}
+          hr
+        .columns
+          each heat as |player pi|
+            .column.card.heat-player.has-text-centered = player
+    else
+      .section
+        .heading.has-text-centered
+          h3.title.is-4 No Heats
