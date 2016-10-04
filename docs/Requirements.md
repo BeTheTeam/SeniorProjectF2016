@@ -6,12 +6,14 @@
 - Create user as player
 - Create user as coach
 - Create user as organizer
+- Create user as scout
 
 ### Player 
 - Input personal information
 - View past race performance
 - Analyze performance statistics
 - View team membership
+- View events for team, both past and upcoming
 
 ### Coach
 - Add and manage player membership
@@ -19,6 +21,7 @@
 - Enter for event or for practice
 - View team stats
 - Take notes on team members
+- View events for team, both past and upcoming
 
 ### Organizer
 - Set-up mini events given a list of players from teams
@@ -29,12 +32,21 @@
     - For track this would be long jump, 100m run, etc.
 - Able to create (mini) event description
 - Able to create (mini) event rules
+- View events for team, both past and upcoming
+
+### Scout
+- View team stats
+- View team membership
+- View player stats on each team
+- View coach notes on team players
+- View events for team, both past and upcoming
 
 ## Nonfunctional Requirements
-- Three (3) types of users:
+- Four (4) types of users:
     - Player
     - Coach
     - Organizer
+	- Scout
 - Statistics have different types (examples)
     - Time (HH:mm:ss), (mm:ss), (ss)
     - Score (numeric)

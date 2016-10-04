@@ -3,7 +3,7 @@
 ## Track
 
 Assumed at this point:
-- Player(s), coach(es), and organizer(s) created
+- Player(s), coach(es), organizer(s), and scout(s) created
 - Players assigned to team(s)
 
 ### Before the Event

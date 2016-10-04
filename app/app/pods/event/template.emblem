@@ -8,7 +8,6 @@ section class="hero is-primary is-bold"
       h3 class="title is-3"
         i.fa.fa-user
         "Players
-
     table class="table roster"
       thead
         tr
@@ -27,14 +26,22 @@ section class="hero is-primary is-bold"
 
 .heat-container.section
   .container
-    .heading
-      .columns
-        .column.has-text-right
-          h3 class="title is-3"
-            i.fa.fa-fire
-            "Heats
-        .column.has-text-left
-          button.button.is-primary.generate-heats click="generateHeats" Generate Heats
+    .heading.has-text-centered
+        h3 class="title is-3"
+          i.fa.fa-fire
+          "Heats
+        .columns
+          .column
+            label.label Number of Players in a Heat
+            = input class="heat-size-input input" type="text" value=heatSize placeholder="Number of Players in a Heat"
+          .column
+            label.label Number of Heats
+            = input class="heat-number-input input" type="text" value=numOfHeats placeholder="Number of Heats"
+        .columns
+          .column
+            button.button.is-primary.generate-heats click="generateHeats" Generate Heats
+          .column
+            button.button.is-primary.generate-number-of-heats click="generateNumberOfHeats" Generate Number Of Heats
     each heats as |heat hi|
       .section.heat
         .heading.has-text-centered
