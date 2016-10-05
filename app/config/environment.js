@@ -14,7 +14,9 @@ module.exports = function(environment) {
       storageBucket: process.env.storageBucket,
       messagingSenderId: process.env.messagingSenderId
     },
-
+    torii: {
+      sessionServiceName: 'session'
+    },
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build

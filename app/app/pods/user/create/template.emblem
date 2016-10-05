@@ -1,0 +1,7 @@
+.login-container
+  p Email:
+  == input class="email-input input" type="text" value=loginEmail placeholder="john.doe@example.com"
+  p Password:
+  == input class="password-input input" type="password" value=loginPassword placeholder="********"
+  br
+  button.button.is-primary{action 'createUser' 'password'} Sign Up!
