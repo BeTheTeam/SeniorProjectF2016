@@ -1,7 +1,15 @@
 .login-container
   p Email:
-  == input class="login-input" type="text" value=loginEmail placeholder="john.doe@example.com"
+  == input class="login-email input" type="text" value=loginEmail placeholder="john.doe@example.com"
   p Password:
-  == input class="login-password" type="password" value=loginPassword placeholder="********"
+  == input class="login-password input" type="password" value=loginPassword placeholder="********"
   br
-  button.button.is-primary{action 'signIn' 'password'}  Login
+  button.btn-login.button.is-primary{action 'login' 'password'}  Login
+
+.logout-container
+  button.btn-logout.button.is-primary{action 'logout'} Logout
+
+if userLoggedIn
+  p User logged in
+else
+  p User logged out
