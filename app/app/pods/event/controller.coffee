@@ -10,7 +10,10 @@ EventController = Ember.Controller.extend
 
   actions:
     addPlayer: ->
-      @model.pushObject @playerName
+      newPlayer = @store.createRecord('player', (
+        name: @.get('playerName')
+      ))
+      newPlayer.save()
       @set('playerName', "")
 
     generateHeats: ->

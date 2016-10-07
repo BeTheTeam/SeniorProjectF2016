@@ -1,8 +1,8 @@
 `import Ember from 'ember';`
 
-EventRoute = Ember.Route.extend
+PlayerRoute = Ember.Route.extend
 
   model: ->
-    ["Player 1", "Player 2", "Player 3"]
+    @store.findAll('player')
 
-`export default EventRoute;`
+`export default PlayerRoute;`
