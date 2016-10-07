@@ -14,8 +14,8 @@ EventPage = PageObject.create
   login: clickable('.btn-login')
   logout: clickable('.btn-logout')
 
-  isLoggedIn: isHidden('.login-container')
-  isLoggedOut: isHidden('.logout-container')
+  isLoggedIn: count('.login-container')
+  isLoggedOut: count('.logout-container')
 
 
 `export default EventPage`

@@ -18,5 +18,19 @@ describe "Integration: LoginPage", ->
       @page.login()
       
       andThen =>
-       expect(@isLoggedIn)
-       expect(@isLoggedOut)
+        expect(@isLoggedIn, 1)
+        expect(@isLoggedOut, 0)
+        @page.logout()
+
+    it "Fails to log in", ->
+      expect(@page.emailValue, undefined)
+      expect(@page.passwordValue, undefined)
+
+      @page.enterEmail('dummy@dumdum.com')
+      @page.enterPassword('verysecurewow')
+
+      @page.login()
+
+      andThen =>
+        expect(@isLoggedIn, 0)
+        expect(@isLoggedOut, 1)
