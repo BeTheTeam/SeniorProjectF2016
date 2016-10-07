@@ -5,19 +5,14 @@ LoginController = Ember.Controller.extend
 
   loginEmail: undefined
   loginPassword: undefined
-  userLoggedIn: false
 
 
   beforeModel: ->
     @get('session').fetch().catch(->)
 
 
-  disableLogin: (data) ->
-    $('.login-container').hide()
-    $('.logout-container').show()
-    Ember.set(@, 'userLoggedIn', true)
-
   setInput: (isValid)  ->
+    console.log('setInput ' + isValid)
     if isValid
       $('input').removeClass('is-danger')
       Ember.set(@, 'loginEmail', undefined)
@@ -33,15 +28,13 @@ LoginController = Ember.Controller.extend
         email: @loginEmail
         password: @loginPassword
 
-      @get('session').open('firebase', providerInfo).then(@disableLogin.bind(@))
-      @setInput(@get('session.isAuthenticated'))
+      @get('session').open('firebase', providerInfo).catch(((data) ->
+        @setInput(@get('session.isAuthenticated'))
+      ).bind(@))
           
 
     logout: ->
       @get('session').close()
-      $('.login-container').show()
-      $('.logout-container').hide()
-      Ember.set(@, 'userLoggedIn', false)
     
 
 `export default LoginController;`
