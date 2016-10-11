@@ -28,7 +28,7 @@ LoginController = Ember.Controller.extend
         email: @loginEmail
         password: @loginPassword
 
-      @get('session').open('firebase', providerInfo).catch(((data) ->
+      @get('session').open('firebaseApp', providerInfo).catch(((data) ->
         @setInput(@get('session.isAuthenticated'))
       ).bind(@))
           
