@@ -1,15 +1,17 @@
 `import Ember from 'ember';`
-`import Firebase from 'firebase';`
+`import Firebase from 'firebase'`
 
 UserCreateController = Ember.Controller.extend
 
   loginEmail: undefined
   loginPassword: undefined
 
-  actions:
-    createUser: ->
-     firebase.auth().createUserWithEmailAndPassword(@loginEmail, @loginPassword).catch((error) ->
-       console.log(error.code)
-       console.log(error.message))
+  roleOptions: Ember.computed.alias('model.roles')
 
+  actions:
+    selection: ->
+
+    createUser: ->
+      console.log(@get('session').createUser())
+    
 `export default UserCreateController;`
