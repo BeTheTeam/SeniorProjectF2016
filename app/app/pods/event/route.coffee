@@ -3,6 +3,6 @@
 PlayerRoute = Ember.Route.extend
 
   model: ->
-    @store.findAll('player')
+    players: @store.findAll('player')
 
 `export default PlayerRoute;`

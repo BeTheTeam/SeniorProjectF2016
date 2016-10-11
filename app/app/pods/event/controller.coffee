@@ -3,7 +3,7 @@
 
 EventController = Ember.Controller.extend
 
-  players: Ember.computed.alias 'model'
+  players: Ember.computed.alias 'model.players'
   heats: undefined
   heatSize: 3
   numOfHeats: 3
