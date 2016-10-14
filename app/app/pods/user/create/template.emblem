@@ -9,4 +9,7 @@
   power-select options=roleOptions selected=selection searchEnabled=false onchange=(action (mut selection)) as |role|
     role.type
 
+  if showError
+    p = errorMessage
+
   button.button.is-primary{action 'createUser' 'password'} Sign Up!
