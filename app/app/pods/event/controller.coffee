@@ -3,14 +3,17 @@
 
 EventController = Ember.Controller.extend
 
-  players: Ember.computed.alias 'model'
+  players: Ember.computed.alias 'model.players'
   heats: undefined
   heatSize: 3
   numOfHeats: 3
 
   actions:
     addPlayer: ->
-      @model.pushObject @playerName
+      newPlayer = @store.createRecord('player', (
+        name: @.get('playerName')
+      ))
+      newPlayer.save()
       @set('playerName', "")
 
     generateHeats: ->

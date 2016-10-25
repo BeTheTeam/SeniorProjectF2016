@@ -43,6 +43,7 @@
     "ember-font-awesome": "2.2.0",
     "ember-load-initializers": "^0.5.1",
     "ember-lodash": "0.0.10",
+    "ember-power-select": "1.0.0-beta.23",
     "ember-resolver": "^2.0.3",
     "emberfire": "2.0.2",
     "firebase": "^3.4.1",

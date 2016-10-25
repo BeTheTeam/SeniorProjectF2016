@@ -1,7 +1,15 @@
-.login-container
+.creat-user-container
   p Email:
   == input class="email-input input" type="text" value=loginEmail placeholder="john.doe@example.com"
   p Password:
   == input class="password-input input" type="password" value=loginPassword placeholder="********"
   br
+
+  p Role:
+  power-select options=roleOptions selected=selection searchEnabled=false onchange=(action (mut selection)) as |role|
+    role.type
+
+  if showError
+    p = errorMessage
+
   button.button.is-primary{action 'createUser' 'password'} Sign Up!

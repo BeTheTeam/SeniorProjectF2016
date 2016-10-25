@@ -16,7 +16,7 @@ section class="hero is-primary is-bold"
       tbody
         each players as |player|
           tr.player.players
-            td = player
+            td = player.name
             td.has-text-right
         tr.new-player
           td
