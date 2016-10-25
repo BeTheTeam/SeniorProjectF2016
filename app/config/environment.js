@@ -7,6 +7,16 @@ module.exports = function(environment) {
     environment: environment,
     baseURL: '/',
     locationType: 'auto',
+    firebase: {
+      apiKey: process.env.apiKey,
+      authDomain: process.env.authDomain,
+      databaseURL: process.env.databaseURL,
+      storageBucket: process.env.storageBucket,
+      messagingSenderId: process.env.messagingSenderId
+    },
+    torii: {
+      sessionServiceName: 'session'
+    },
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
@@ -38,6 +48,13 @@ module.exports = function(environment) {
     ENV.APP.LOG_VIEW_LOOKUPS = false;
 
     ENV.APP.rootElement = '#ember-testing';
+
+    ENV.firebase.apiKey = process.env.testApiKey;
+    ENV.firebase.authDomain = process.env.testAuthDomainURL;
+    ENV.firebase.databaseURL = process.env.testDatabaseURL;
+    ENV.firebase.storageBucket = process.env.testStorageBucket;
+    ENV.firebase.messagingSenderId = process.env.testMessagingSenderId;
+
   }
 
   if (environment === 'production') {
