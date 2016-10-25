@@ -18,7 +18,7 @@
   },
   "author": "",
   "license": "MIT",
-  "devDependencies": {
+  "dependencies": {
     "bluebird": "3.4.6",
     "broccoli-asset-rev": "^2.4.2",
     "ember-ajax": "2.5.2",
@@ -50,12 +50,5 @@
     "loader.js": "^4.0.1",
     "lodash": "4.16.4",
     "torii": "0.8.0"
-  },
-  "dependencies": {
-    "ember-font-awesome": "^2.2.0",
-    "ember-power-select": "1.0.0-beta.26",
-    "emberfire": "^2.0.4",
-    "firebase": "^3.4.1",
-    "torii": "^0.8.0"
   }
 }
