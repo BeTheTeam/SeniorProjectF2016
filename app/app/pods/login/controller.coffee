@@ -12,7 +12,6 @@ LoginController = Ember.Controller.extend
 
 
   setInput: (isValid)  ->
-    console.log('setInput ' + isValid)
     if isValid
       $('input').removeClass('is-danger')
       Ember.set(@, 'loginEmail', undefined)
@@ -28,7 +27,8 @@ LoginController = Ember.Controller.extend
         email: @loginEmail
         password: @loginPassword
 
-      @get('session').open('firebaseApp', providerInfo).catch(((data) ->
+      @get('session').open('firebase', providerInfo).catch(((data) ->
+        console.log(data)
         @setInput(@get('session.isAuthenticated'))
       ).bind(@))
           
