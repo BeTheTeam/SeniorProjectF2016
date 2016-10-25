@@ -2,4 +2,40 @@ section class="hero is-primary is-bold is-large"
   .hero-body
     .container.has-text-centered
       h2 class="title is-2" Welcome to BeThe.Team
-= outlet
+      p
+        link-to class="button is-info is-large" "login" | Login!
+.columns
+  .column
+    p
+.columns.has-text-centered
+  .column
+    .box
+      p.title.is-3 Coaches
+      p
+        span.icon.is-large
+          i.fa.fa-clipboard
+      p Track your teams performance game-by-game!
+  .column
+    .box
+      p.title.is-3  Organizers
+      p
+        span.icon.is-large
+          i.fa.fa-table
+      p Quickly set up competitive heats and races!
+  .column
+    .box
+      p.title.is-3  Scouts
+      p
+        span.icon.is-large
+          i.fa.fa-search
+      p Compare athletes scores to other teams!
+  .column
+    .box
+      p.title.is-3  Athletes
+      p
+        span.icon.is-large
+          i.fa.fa-line-chart
+      p Get detailed analysis on areas to improve!
+.columns
+  .column
+    = outlet
