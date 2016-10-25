@@ -14,9 +14,9 @@ describe "Integration: LoginPage", ->
 
       @page.enterEmail('test@bethe.team')
       @page.enterPassword('testPassw0rd')
-      
+
       @page.login()
-      
+
       andThen =>
         expect(@isLoggedIn, 1)
         expect(@isLoggedOut, 0)
