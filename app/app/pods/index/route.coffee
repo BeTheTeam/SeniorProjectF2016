@@ -2,4 +2,6 @@
 
 HomeRoute = Ember.Route.extend
 
+  model: ->
+
 `export default HomeRoute;`
