@@ -50,7 +50,7 @@ section class="hero is-primary is-bold"
           hr
         .columns
           each heat as |player pi|
-            .column.card.heat-player.has-text-centered = player
+            .column.card.heat-player.has-text-centered = player.name
     else
       .section
         .heading.has-text-centered

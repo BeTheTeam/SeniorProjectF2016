@@ -27,11 +27,10 @@ LoginController = Ember.Controller.extend
         email: @loginEmail
         password: @loginPassword
 
-      @get('session').open('firebase', providerInfo).catch(((data) ->
+      @get('session').open('firebase', providerInfo).catch (data) =>
         console.log(data)
         @setInput(@get('session.isAuthenticated'))
-      ).bind(@))
-          
+
 
     logout: ->
       @get('session').close()

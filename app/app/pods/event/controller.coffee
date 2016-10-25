@@ -18,8 +18,8 @@ EventController = Ember.Controller.extend
 
     generateHeats: ->
       #TODO This can probably be done with a nice functional solution
-      numHeats = @get('players').length//@heatSize
-      shuffledPlayers = _.shuffle(@.get('players'))
+      numHeats = @get('players.length')//@heatSize
+      shuffledPlayers = _.shuffle(@get('players').toArray())
       tempHeats = []
       for i in [0...numHeats]
         singleHeat = []

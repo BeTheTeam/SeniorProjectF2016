@@ -2,7 +2,7 @@
 
 { collection, visitable, clickable, isHidden, count, fillable, value } = PageObject
 
-EventPage = PageObject.create
+LoginPage = PageObject.create
   visit: visitable('/login')
 
   enterEmail: fillable('.login-email')
@@ -18,4 +18,4 @@ EventPage = PageObject.create
   isLoggedOut: count('.logout-container')
 
 
-`export default EventPage`
+`export default LoginPage`
