@@ -1,0 +1,11 @@
+unless session.isAuthenticated
+  .login-container
+    p Email:
+    == input class="login-email input" type="text" value=loginEmail placeholder="john.doe@example.com"
+    p Password:
+    == input class="login-password input" type="password" value=loginPassword placeholder="********"
+    br
+    button.btn-login.button.is-primary{action 'login' 'password'}  Login
+else
+  .logout-container
+    button.btn-logout.button.is-primary{action 'logout'} Logout

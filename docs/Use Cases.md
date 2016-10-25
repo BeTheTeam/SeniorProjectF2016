@@ -29,3 +29,7 @@ Assumed at this point:
 ### Request Heat
 
 ![Request Heat Use Case](images/requestHeat.PNG)
+
+### View Details
+
+![View Details Use Case](images/viewDetails.PNG)

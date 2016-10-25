@@ -43,11 +43,19 @@
     "ember-font-awesome": "2.2.0",
     "ember-load-initializers": "^0.5.1",
     "ember-lodash": "0.0.10",
+    "ember-power-select": "1.0.0-beta.23",
     "ember-resolver": "^2.0.3",
+    "emberfire": "2.0.2",
+    "firebase": "^3.4.1",
     "loader.js": "^4.0.1",
-    "lodash": "4.16.0"
+    "lodash": "4.16.0",
+    "torii": "0.8.0"
   },
   "dependencies": {
-    "ember-font-awesome": "^2.2.0"
+    "ember-font-awesome": "^2.2.0",
+    "ember-power-select": "1.0.0-beta.23",
+    "emberfire": "^2.0.4",
+    "firebase": "^3.4.1",
+    "torii": "^0.8.0"
   }
 }
