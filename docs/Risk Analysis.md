@@ -64,6 +64,10 @@
 	  - Ability to log in/out
 	  - Have log in be a barrier to other pages
 	  - Implement Firebase persistent data
+	  - Implement Go-to-Market UI
+	  - Implement User Roles
+	  - Create User Role Stories
+	  - Model User Roles after their Stories
       - Medium-risk to High-risk because we need to write and test code for each function
   -  Backbone of project
       - Coding the set-up of how our website will function 
