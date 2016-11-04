@@ -11,3 +11,23 @@ The scout will also see the Coach's notes on this individual player.
 The scout can also click a button to display all events, past and upcoming.  From there, the scout can click on an upcoming event and view which teams are/participating.
 The scout can also click on a past event and view which teams participated and what were the overall stats of each team.
 The scout can click on a team and view individual stats of each player in the event as well as their individual stats in each mini event/heat. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
