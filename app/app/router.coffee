@@ -7,6 +7,7 @@ Router = Ember.Router.extend
 Router.map ->
   @route 'event'
   @route 'login'
+  @route 'teams'
   @route 'user', ->
     @route 'create'
 
