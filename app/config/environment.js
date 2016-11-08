@@ -36,13 +36,6 @@ module.exports = function(environment) {
     // ENV.APP.LOG_TRANSITIONS = true;
     // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
     // ENV.APP.LOG_VIEW_LOOKUPS = true;
-
-    ENV.firebase.apiKey = process.env.testApiKey;
-    ENV.firebase.authDomain = process.env.testAuthDomainURL;
-    ENV.firebase.databaseURL = process.env.testDatabaseURL;
-    ENV.firebase.storageBucket = process.env.testStorageBucket;
-    ENV.firebase.messagingSenderId = process.env.testMessagingSenderId;
-
   }
 
   if (environment === 'test') {
@@ -55,6 +48,13 @@ module.exports = function(environment) {
     ENV.APP.LOG_VIEW_LOOKUPS = false;
 
     ENV.APP.rootElement = '#ember-testing';
+
+    ENV.firebase.apiKey = process.env.testApiKey;
+    ENV.firebase.authDomain = process.env.testAuthDomainURL;
+    ENV.firebase.databaseURL = process.env.testDatabaseURL;
+    ENV.firebase.storageBucket = process.env.testStorageBucket;
+    ENV.firebase.messagingSenderId = process.env.testMessagingSenderId;
+
   }
 
   if (environment === 'production') {
