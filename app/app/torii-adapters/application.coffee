@@ -10,9 +10,11 @@ MyToriiFirebaseAdapter = ToriiFirebaseAdapter.extend
 
   open: (auth) ->
     # console.log(firebase.query('userprofile', {uid: auth.uid}))
+    console.log(auth)
     return auth
 
   close: ->
-    return true
+    @set('session.uid', null)
+    return @get('session').close().then(() => @transitionTo('index'));
 
 `export default MyToriiFirebaseAdapter`

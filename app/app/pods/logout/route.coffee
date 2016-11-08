@@ -4,6 +4,6 @@ LogoutRoute = Ember.Route.extend
 
   model: ->
     @get('session').close()
-    @transitionToRoute('index')
+    @transitionTo('index')
 
 `export default LogoutRoute;`

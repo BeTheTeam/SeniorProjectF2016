@@ -1,8 +1,10 @@
 `import Ember from 'ember';`
+`import Firebase from 'firebase'`
 
 PlayerRoute = Ember.Route.extend
 
   model: ->
-    players: @store.findAll('player')
+    if @session.get('uid')
+      players: @store.query('player', {orderBy: 'uid', startAt:@session.get('uid'), endAt:@session.get('uid')})
 
 `export default PlayerRoute;`

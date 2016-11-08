@@ -53,6 +53,8 @@ RegisterController = Ember.Controller.extend
           newUserProfile.uid= newUser.uid
           newUserProfile.save()
 
+          this_page.transitionToRoute('login')
+
         , ((response) ->
 
           # Unsuccessfully created user

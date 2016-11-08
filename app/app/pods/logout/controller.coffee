@@ -5,7 +5,6 @@ LogoutController = Ember.Controller.extend
 
   beforeModel: ->
     @get('session').close()
-    @transitionToRoute('index')
 
 
 `export default LogoutController;`

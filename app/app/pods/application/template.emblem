@@ -13,11 +13,12 @@
         = link-to "Home" "index" class="nav-item"
         = link-to "Events" "event" class="nav-item"
         a.nav-item
-          if session
+          if session.uid
             span.nav-item
               session.email
             = link-to "Logout" "logout" class="button"
           else
-            = link-to "Login" "login" class="button is-primary"
+            = link-to "Register" "register" class="button is-primary"
+            = link-to "Login" "login" class="button"
 .column.is-10.is-offset-1.p-a-0
   = outlet
