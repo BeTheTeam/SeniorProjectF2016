@@ -1,0 +1,18 @@
+.nav.nav.has-shadow
+  .column.is-10.is-offset-1.p-a-0
+    .nav
+      .nav-left
+        a.nav-item.is-brand href="#"
+          h1.title.is-3 id="title" BETHE.TEAM
+
+      span.nav-toggle
+        = link-to "Home" "index" class="nav-item"
+        = link-to "Events" "event" class="nav-item"
+
+      .nav-right.nav-menu
+        = link-to "Home" "index" class="nav-item"
+        = link-to "Events" "event" class="nav-item"
+        a.nav-item
+          = link-to "Login" "login" class="button is-primary"
+.column.is-10.is-offset-1.p-a-0
+  = outlet
