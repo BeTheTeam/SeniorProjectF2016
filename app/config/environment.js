@@ -31,17 +31,19 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    // ENV.APP.LOG_RESOLVER = true;
-    // ENV.APP.LOG_ACTIVE_GENERATION = true;
-    // ENV.APP.LOG_TRANSITIONS = true;
-    // ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
-    // ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.APP.LOG_RESOLVER = true;
+    ENV.APP.LOG_ACTIVE_GENERATION = true;
+    ENV.APP.LOG_TRANSITIONS = true;
+    ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
+    ENV.APP.LOG_VIEW_LOOKUPS = true;
+    ENV.firebase.apiKey = process.env.BTT_TEST_FB_APIKEY;
+    ENV.firebase.authDomain = process.env.BTT_TEST_FB_AUTHDOMAIN;
+    ENV.firebase.databaseURL = process.env.BTT_TEST_FB_DATABASEURL;
+    ENV.firebase.storageBucket = process.env.BTT_TEST_FB_STORAGEBUCKET;
+    ENV.firebase.messagingSenderId = process.env.BTT_TEST_FB_MESSAGINGSENDERID;
   }
 
   if (environment === 'test') {
-    // Testem prefers this...
-    ENV.baseURL = '/';
-    ENV.locationType = 'none';
 
     // keep test console output quieter
     ENV.APP.LOG_ACTIVE_GENERATION = false;
@@ -49,12 +51,16 @@ module.exports = function(environment) {
 
     ENV.APP.rootElement = '#ember-testing';
 
-    ENV.firebase.apiKey = process.env.testApiKey;
-    ENV.firebase.authDomain = process.env.testAuthDomainURL;
-    ENV.firebase.databaseURL = process.env.testDatabaseURL;
-    ENV.firebase.storageBucket = process.env.testStorageBucket;
-    ENV.firebase.messagingSenderId = process.env.testMessagingSenderId;
+    ENV.firebase.apiKey = process.env.BTT_TEST_FB_APIKEY;
+    ENV.firebase.authDomain = process.env.BTT_TEST_FB_AUTHDOMAIN;
+    ENV.firebase.databaseURL = process.env.BTT_TEST_FB_DATABASEURL;
+    ENV.firebase.storageBucket = process.env.BTT_TEST_FB_STORAGEBUCKET;
+    ENV.firebase.messagingSenderId = process.env.BTT_TEST_FB_MESSAGINGSENDERID;
 
+    ENV.testing = {
+      user: "test@bethe.team",
+      password: "password"
+    };
   }
 
   if (environment === 'production') {

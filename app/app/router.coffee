@@ -7,7 +7,7 @@ Router = Ember.Router.extend
 Router.map ->
   @route 'event'
   @route 'login'
-  @route 'user', ->
-    @route 'create'
+  @route 'register'
+  @route 'home'
 
 `export default Router;`
