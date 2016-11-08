@@ -22,6 +22,8 @@ LoginController = Ember.Controller.extend
 
   actions:
     login: (provider) ->
+      @get('session').fetch().catch(->)
+      return
       providerInfo =
         provider: 'password'
         email: @loginEmail
