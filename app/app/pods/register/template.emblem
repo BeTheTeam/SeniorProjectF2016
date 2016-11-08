@@ -18,13 +18,13 @@ section class="hero is-primary is-bold"
         role.type
     label.label Name:
     p.control
-      == input class="name-input input" type="text" value=registerName placeholder="John Doe" action="newlineHook"
+      == input class="name-input input" type="text" value=registerName placeholder="John Doe" enter="newlineHook"
     label.label Email:
     p.control
-      == input class="email-input input" type="text" value=registerEmail placeholder="john.doe@example.com" action="newlineHook"
+      == input class="email-input input" type="text" value=registerEmail placeholder="john.doe@example.com" enter="newlineHook"
     label.label Password:
     p.control
-      == input class="password-input input" type="password" value=registerPassword placeholder="******" action="newlineHook"
+      == input class="password-input input" type="password" value=registerPassword placeholder="******" enter="newlineHook"
 
 
     button.button.is-primary{action 'register' 'password'} id="registerBtn" Sign Up!

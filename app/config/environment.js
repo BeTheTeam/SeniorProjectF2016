@@ -41,6 +41,9 @@ module.exports = function(environment) {
     ENV.firebase.databaseURL = process.env.BTT_TEST_FB_DATABASEURL;
     ENV.firebase.storageBucket = process.env.BTT_TEST_FB_STORAGEBUCKET;
     ENV.firebase.messagingSenderId = process.env.BTT_TEST_FB_MESSAGINGSENDERID;
+    ENV.torii = {
+      sessionServiceName: 'session'
+    };
   }
 
   if (environment === 'test') {

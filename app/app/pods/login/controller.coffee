@@ -18,24 +18,19 @@ LoginController = Ember.Controller.extend
       Ember.set(@, 'loginPassword', undefined)
     else
       $('input').addClass('is-danger')
-    
+
 
   actions:
     login: (provider) ->
-      @get('session').fetch().catch(->)
-      return
+      # @get('session').fetch().catch(->)
+      # return
       providerInfo =
         provider: 'password'
         email: @loginEmail
         password: @loginPassword
 
-      @get('session').open('firebase', providerInfo).catch (data) =>
-        console.log(data)
-        @setInput(@get('session.isAuthenticated'))
+      wndow = @
+      @get('session').open('firebase', providerInfo).then(-> wndow.transitionToRoute('home'))
 
-
-    logout: ->
-      @get('session').close()
-    
 
 `export default LoginController;`

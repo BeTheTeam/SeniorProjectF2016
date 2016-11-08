@@ -9,5 +9,6 @@ Router.map ->
   @route 'login'
   @route 'register'
   @route 'home'
+  @route 'logout'
 
 `export default Router;`

@@ -1,9 +1,9 @@
 unless session.isAuthenticated
   .login-container
     p Email:
-    == input class="login-email input" type="text" value=loginEmail placeholder="john.doe@example.com"
+    == input class="login-email input" type="text" value=loginEmail placeholder="john.doe@example.com" enter='login'
     p Password:
-    == input class="login-password input" type="password" value=loginPassword placeholder="********"
+    == input class="login-password input" type="password" value=loginPassword placeholder="********" enter='login'
     br
     button.btn-login.button.is-primary{action 'login' 'password'}  Login
 else
