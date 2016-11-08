@@ -4,25 +4,17 @@
 MyToriiFirebaseAdapter = ToriiFirebaseAdapter.extend
   firebase: Ember.inject.service()
 
-  fetch: ->
-    console.log('test fetch')
-    token = @get('storage.token')
-    console.log(token)
-    if Ember.isEmpty(token)
-      throw new Error('No token in storage')
-    
-    Ember.RSVP.resolve(
-      token
-    )
+  fetch: (auth) ->
+    console.log("so fetch")
+    console.log(auth)
 
-  open: ->
-    cosole.log('test open')
-    @set('storage.token', 'test')
-    Ember.RSVP.resolve()
+  open: (auth) ->
+    # console.log(firebase.query('userprofile', {uid: auth.uid}))
+    console.log(auth)
+    return auth
 
   close: ->
-    console.log('test close')
-    @set('storage.token', null)
-    Ember.RSVP.resolve()
+    @set('session.uid', null)
+    return @get('session').close().then(() => @transitionTo('index'));
 
 `export default MyToriiFirebaseAdapter`
