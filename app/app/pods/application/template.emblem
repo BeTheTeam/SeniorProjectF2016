@@ -12,6 +12,7 @@
       .nav-right.nav-menu
         = link-to "Home" "index" class="nav-item"
         = link-to "Events" "event" class="nav-item"
+        = link-to "Teams" "teams" class="nav-item"
         a.nav-item
           = link-to "Login" "login" class="button is-primary"
 .column.is-10.is-offset-1.p-a-0

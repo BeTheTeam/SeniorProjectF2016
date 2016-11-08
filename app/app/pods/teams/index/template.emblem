@@ -1,1 +1,4 @@
-div Please select a team
+section class="hero is-info is-bold"
+  .hero-body
+    .container.has-text-centered
+      h4 class="title is-4" Please Select A Team
