@@ -1,0 +1,15 @@
+= model.team.name
+div.currentPlayers
+  p Current Players
+  each model.team.players as |player|
+    ul
+      li = player.name
+div.freePlayers
+  p Free Players
+  each freePlayers as |player|
+    ul
+      li
+        = player.name
+        button.addPlayer{action "addPlayer" player}
+          div Add Me
+

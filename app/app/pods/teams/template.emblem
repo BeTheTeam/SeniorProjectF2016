@@ -12,10 +12,15 @@
       tbody
         each teams as |team|
           tr.teams.team
-            td = team.name
+            td
+              link-to "teams.show" team.id
+                = team.name
             td.has-text-right
         tr.new-player
           td
             = input class="team-name-input input" type="text" value=teamName placeholder="Enter a Team's name" enter="createTeam"
           td.has-text-right
             button.button.is-primary.add-team click="createTeam" Add a Team
+
+.team-details
+  =outlet
