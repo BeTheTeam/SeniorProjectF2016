@@ -1,26 +1,25 @@
-.teams-container.section
-  .container
-    .heading.has-text-centered
-      h3 class="title is-3"
-        i.fa.fa-user
+section.teams-container.hero.is-primary.is-bold
+  .hero-body
+    .container.has-text-centered
+      h2 class="title is-2"
         "Teams
-    table class="table roster"
-      thead
-        tr
-          th Team Name
-          th
-      tbody
-        each teams as |team|
-          tr.teams.team
-            td
-              link-to "teams.show" team.id
-                = team.name
-            td.has-text-right
-        tr.new-player
-          td
-            = input class="team-name-input input" type="text" value=teamName placeholder="Enter a Team's name" enter="createTeam"
-          td.has-text-right
-            button.button.is-primary.add-team click="createTeam" Add a Team
+table.table.roster
+  thead
+    tr
+      th Team Name
+      th
+  tbody
+    each teams as |team|
+      tr.teams.team
+        td
+          link-to "teams.show" team.id
+            = team.name
+        td.has-text-right
+    tr.new-player
+      td
+        = input class="team-name-input input" type="text" value=teamName placeholder="Enter a Team's name" enter="createTeam"
+      td.has-text-right
+        button.button.is-primary.add-team click="createTeam" Add a Team
 
 .team-details
   =outlet
