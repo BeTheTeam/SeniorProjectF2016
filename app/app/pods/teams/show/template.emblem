@@ -4,6 +4,8 @@ div.currentPlayers
   each model.team.players as |player|
     ul
       li = player.name
+      button.addPlayer{action "removePlayer" player}
+        div Remove Me
 div.freePlayers
   p Free Players
   each freePlayers as |player|
