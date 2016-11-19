@@ -6,7 +6,11 @@
   - Ember.js
       - Open-source JavaScript Web framework that is readily available at no cost, is easy to install, and allows scalable, web applications to be built.
       - Lots of help available online and two of our group members have used Ember.js, with one of them using it on a daily basis.
-      - Low-risk
+      - Low/Medium risk
+  - Firebase
+	  - Web application backend platform for easy building of high-quality websites.
+	  - Two of our members have used this in the past and lots of assistance available online.
+	  - Low/Medium risk
   - Coffee Script
       - Short hand programming language that complies itself into JavaScript without the user having to worry about format and punctuation as much.
       - Many user guides and examples online and it is easily and quickly learned.
@@ -15,9 +19,10 @@
       - Communication App that is connectable to GitHub
       - Allows team communication at any time and notifies the entire team when a commit is made on GitHub
       - Low-risk
-  - Trello
-      - Web-based project management tool
+  - Microsoft Project
+      - Project management tool
       - It is free of cost and can be uses to set and assign specific tasks to individual group members.
+	  - Automatically creates useful diagrams like Gnatt charts for easy project management.
       - Low-risk
   - GitHub
       - Web-based Git repository hosting service
