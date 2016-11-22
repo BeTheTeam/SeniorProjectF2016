@@ -9,5 +9,6 @@ Router.map ->
   @route 'login'
   @route 'user', ->
     @route 'create'
+    @route 'statistics'
 
 `export default Router;`
