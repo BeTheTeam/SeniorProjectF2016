@@ -11,7 +11,8 @@ EventController = Ember.Controller.extend
   actions:
     addPlayer: ->
       newPlayer = @store.createRecord('player', (
-        name: @.get('playerName')
+        name: @.get('playerName'),
+        uid: @session.get('uid')
       ))
       newPlayer.save()
       @set('playerName', "")
