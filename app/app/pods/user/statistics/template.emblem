@@ -1,1 +1,4 @@
-ember-chart type='line' data=lineData width=200 height=200
+.container
+  p = mainStats.label
+  each mainStats.stats as |stat|
+    li = stat.data

@@ -15,14 +15,14 @@ stat3 =
   dateTime: 1479420306
   data: 1
 
-event =
-  label: "Babby's First Event"
+statParent =
+  label: "Main"
   stats:
     [ stat1, stat2, stat3 ]
 
 
 UserStatsRoute = Ember.Route.extend
   model: ->
-    [event]
+    mainStats: statParent
 
 `export default UserStatsRoute;`
