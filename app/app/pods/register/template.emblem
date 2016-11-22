@@ -15,7 +15,7 @@ section class="hero is-primary is-bold"
     label.label Role:
     p.control
       power-select options=roleOptions selected=registerRole searchEnabled=false onchange=(action (mut registerRole)) as |role|
-        role.type
+        role
     label.label Name:
     p.control
       == input class="name-input input" type="text" value=registerName placeholder="John Doe" enter="newlineHook"

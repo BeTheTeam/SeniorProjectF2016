@@ -1,9 +1,16 @@
-`import DS from 'ember-data'`
+`import User from './user'`
 
-PlayerModel = DS.Model.extend
+PlayerModel = User.extend
 
-  name: DS.attr('string')
-  uid: DS.attr('string')
+  only_player_thing: DS.attr('string')
+  team_memberships: DS.hasMany('teammembers')
 
+  save: () ->
+    @_super().then((() ->
+      @store.createRecord('user', (
+        id: @id,
+        role: 'player'
+      )).save().then()
+    ).bind(@))
 
 `export default PlayerModel;`

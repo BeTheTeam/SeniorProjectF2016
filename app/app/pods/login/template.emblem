@@ -13,7 +13,7 @@ section class="hero is-primary is-bold"
       p.control
         == input class="login-password input" type="password" value=loginPassword placeholder="********" enter='login'
       p.control
-        button.btn-login.button.is-primary{action 'login' 'password'}  Login
+        button.btn-login.button.is-primary{action 'login'}  Login
   else
     .logout-container
       button.btn-logout.button.is-primary{action 'logout'} Logout

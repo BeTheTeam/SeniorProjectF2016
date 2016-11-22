@@ -3,7 +3,7 @@
 RegisterController = Ember.Controller.extend
 
   firebaseApp: Ember.inject.service()
-  roleOptions: Ember.computed.alias('model.roles')
+  roleOptions: ['Coach', 'Organizer', 'Scout', 'Athlete']
   errorMsgs: []
   successMsg: false
 
@@ -39,21 +39,19 @@ RegisterController = Ember.Controller.extend
       if inputEmail && inputPassword && inputName && inputRole
 
         auth = @get('firebaseApp').auth()
-        newUserProfile = @store.createRecord('userprofile', (
-          name: inputName,
-          role: inputRole
-        ))
-        this_page = @
+        this_c = @
         auth.createUserWithEmailAndPassword(inputEmail, inputPassword).then((newUser) ->
           console.log(newUser)
           # Successfully create user
           console.log('user created')
-          Ember.set(this_page, 'successMsg', true)
+          Ember.set(this_c, 'successMsg', true)
 
-          newUserProfile.uid= newUser.uid
-          newUserProfile.save()
-
-          this_page.transitionToRoute('login')
+          this_c.store.createRecord('player', (
+            id: newUser.uid
+            name: inputName,
+            role: inputRole,
+            only_player_thing: "heyyo"
+          )).save().then(() -> this_c.transitionToRoute('login'))
 
         , ((response) ->
 
