@@ -1,11 +1,19 @@
-unless session.isAuthenticated
-  .login-container
-    p Email:
-    == input class="login-email input" type="text" value=loginEmail placeholder="john.doe@example.com"
-    p Password:
-    == input class="login-password input" type="password" value=loginPassword placeholder="********"
-    br
-    button.btn-login.button.is-primary{action 'login' 'password'}  Login
-else
-  .logout-container
-    button.btn-logout.button.is-primary{action 'logout'} Logout
+section class="hero is-primary is-bold"
+  .hero-body
+    .container.has-text-centered
+      h2 class="title is-2" Login
+.register-container.section
+  .container
+  unless session.isAuthenticated
+    .login-container
+      label.label Email:
+      p.control
+        == input class="login-email input" type="text" value=loginEmail placeholder="john.doe@example.com" enter='login'
+      label.label Password:
+      p.control
+        == input class="login-password input" type="password" value=loginPassword placeholder="********" enter='login'
+      p.control
+        button.btn-login.button.is-primary{action 'login' 'password'}  Login
+  else
+    .logout-container
+      button.btn-logout.button.is-primary{action 'logout'} Logout
