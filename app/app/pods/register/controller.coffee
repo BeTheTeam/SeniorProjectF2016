@@ -3,7 +3,7 @@
 RegisterController = Ember.Controller.extend
 
   firebaseApp: Ember.inject.service()
-  roleOptions: ['Coach', 'Organizer', 'Scout', 'Athlete']
+  roleOptions: ['Coach', 'Organizer', 'Scout', 'Player']
   errorMsgs: []
   successMsg: false
 
@@ -46,11 +46,9 @@ RegisterController = Ember.Controller.extend
           console.log('user created')
           Ember.set(this_c, 'successMsg', true)
 
-          this_c.store.createRecord('player', (
+          this_c.store.createRecord(inputRole.toLowerCase(), (
             id: newUser.uid
             name: inputName,
-            role: inputRole,
-            only_player_thing: "heyyo"
           )).save().then(() -> this_c.transitionToRoute('login'))
 
         , ((response) ->

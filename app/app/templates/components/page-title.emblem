@@ -1,0 +1,5 @@
+section class="hero is-primary is-bold is-medium" style="background-image: url('/banners/{{cpimgnum}}.jpg') !important;"
+  .hero-body
+    .container.has-text-centered
+      h2 class="title is-2"
+        store.page_title

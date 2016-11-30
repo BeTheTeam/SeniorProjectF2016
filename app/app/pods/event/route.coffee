@@ -7,4 +7,7 @@ PlayerRoute = Ember.Route.extend
     if @session.get('uid')
       players: @store.query('player', {orderBy: 'uid', startAt:@session.get('uid'), endAt:@session.get('uid')})
 
+  beforeModel: ->
+    @set('store.page_title', "Events")
+
 `export default PlayerRoute;`

@@ -5,28 +5,35 @@ MyToriiFirebaseAdapter = ToriiFirebaseAdapter.extend
   firebase: Ember.inject.service()
   storage: Ember.inject.service()
   session: Ember.inject.service()
+  store: Ember.inject.service()
 
   fetch: () ->
-    token = @get('storage.token')
-
-    console.log(@session)
-    if Ember.isEmpty(token)
-      throw new Error('No token in storage')
+    this_u = @get('storage.cu')
+    if Ember.isEmpty(this_u)
+      throw new Error('No user in storage')
       return
     else
-      return @get('storage.cu')
+      @get('store').findRecord('user', this_u.uid ).then(((u) ->
+        this_u.role = u.get('role')
+        @get('store').findRecord(u.get('role'), this_u.uid).then(((tu) ->
+          this_u.typed = tu.data
+          return this_u
+          ).bind(@))
+        ).bind(@))
 
-  open: (auth) ->
-
-    @set('storage.cu', auth)
-    auth.getToken().then(((t) ->
-      @set('storage.token', t)
+  open: (this_u) ->
+    console.log(this_u)
+    @set('storage.cu', this_u)
+    @get('store').findRecord('user', this_u.uid ).then(((u) ->
+      this_u.role = u.get('role')
+      @get('store').findRecord(u.get('role'), this_u.uid).then(((tu) ->
+        this_u.typed = tu.data
+        return this_u
+      ).bind(@))
     ).bind(@))
-    return auth
 
   close: ->
     @set('storage.cu', null)
-    @set('storage.token', null)
     return @get('session').close().then((() => @transitionTo('index')).bind(@));
 
 `export default MyToriiFirebaseAdapter`

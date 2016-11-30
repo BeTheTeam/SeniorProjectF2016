@@ -1,7 +1,3 @@
-section class="hero is-primary is-bold"
-  .hero-body
-    .container.has-text-centered
-      h2 class="title is-2" Home
 .container
   p
     "Thank you for checking out BeThe.Team!

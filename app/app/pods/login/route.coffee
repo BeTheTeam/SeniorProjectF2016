@@ -19,4 +19,7 @@ LoginRoute = Ember.Route.extend
         return
       ).bind(@))
 
+  beforeModel: ->
+    @set('store.page_title', 'Login')
+
 `export default LoginRoute;`
