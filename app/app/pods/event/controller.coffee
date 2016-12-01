@@ -15,8 +15,11 @@ EventController = Ember.Controller.extend
     t1 = @store.peekRecord('team', @team1.id)
     t2 = @store.peekRecord('team', @team2.id)
     playerList = t1.get('players').toArray()
-    t2p = t2.get('players').toArray()
-    return playerList.concat(t2p)
+    t2.get('players').toArray().forEach((p) ->
+      if playerList.indexOf(p) < 0
+        playerList = playerList.concat([p])
+      )
+    return playerList
 
   actions:
     # addPlayer: ->
