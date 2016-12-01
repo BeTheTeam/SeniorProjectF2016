@@ -28,6 +28,23 @@
           "Heats
         .columns
           .column
+            = power-select [
+              options=teams
+              searchEnabled=false
+              onchange=(action (mut team1))
+              selected=team1
+            ] as |team|
+              = team.name
+          .column
+            = power-select [
+              options=teams
+              searchEnabled=false
+              onchange=(action (mut team2))
+              selected=team2
+            ] as |team|
+              = team.name
+        .columns
+          .column
             label.label Number of Players in a Heat
             = input class="heat-size-input input" type="text" value=heatSize placeholder="Number of Players in a Heat"
           .column
