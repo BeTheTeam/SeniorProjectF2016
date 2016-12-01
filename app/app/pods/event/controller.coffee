@@ -11,23 +11,12 @@ EventController = Ember.Controller.extend
   team1: undefined
   team2: undefined
 
-  anotherCompProperty: Ember.computed 'numOfHeats', ->
-    console.log "This is a computed property happening"
-
   combinedTeams: Ember.computed 'players', 'team1', 'team2', ->
-    console.log "This section is happening"
     playerList = []
-    for player in @players
-      console.log player.get('teamName')
-      console.log @team1.get('name')
-      console.log @team2.get('name')
+    for player in @get('players').toArray()
       if player.get('teamName') == @team1.get('name') or player.get('teamName') == @team2.get('name')
-        playerList.append(player)
-    for player in playerList
-      console.log player.get('name')
+        playerList.push(player)
     playerList
-
-
 
   actions:
     addPlayer: ->
@@ -40,8 +29,7 @@ EventController = Ember.Controller.extend
 
     generateHeats: ->
       #TODO This can probably be done with a nice functional solution
-      console.log @get('team1.players').toArray()
-      console.log @get('team2.players').toArray()
+      console.log @get('combinedTeams.length')//@heatSize
       numHeats = @get('combinedTeams.length')//@heatSize
       shuffledPlayers = _.shuffle(@get('combinedTeams').toArray())
       tempHeats = []

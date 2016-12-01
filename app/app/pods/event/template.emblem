@@ -33,15 +33,28 @@ section class="hero is-primary is-bold"
           "Heats
         .columns
           .column
+            = power-select [
+              options=teams
+              searchEnabled=false
+              onchange=(action (mut team1))
+              selected=team1
+            ] as |team|
+              = team.name
+          .column
+            = power-select [
+              options=teams
+              searchEnabled=false
+              onchange=(action (mut team2))
+              selected=team2
+            ] as |team|
+              = team.name
+        .columns
+          .column
             label.label Number of Players in a Heat
             = input class="heat-size-input input" type="text" value=heatSize placeholder="Number of Players in a Heat"
           .column
             label.label Number of Heats
             = input class="heat-number-input input" type="text" value=numOfHeats placeholder="Number of Heats"
-        .container
-          p This is dat boi
-          each player as |combinedTeams|
-            = player.name
         .columns
           .column
             button.button.is-primary.generate-heats click="generateHeats" Generate Heats
