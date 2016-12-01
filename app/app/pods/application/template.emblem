@@ -43,7 +43,7 @@ page-title
 .column.is-10.is-offset-1.p-a-0
   = outlet
 
-.container.has-text-centered
+.container.has-text-centered style="margin-top: 20px"
   p
     i
       "2016 &copy; BeThe.Team, LLC

@@ -11,27 +11,27 @@ EventController = Ember.Controller.extend
   team1: undefined
   team2: undefined
 
-  combinedTeams: Ember.computed 'players', 'team1', 'team2', ->
-    playerList = []
-    for player in @get('players').toArray()
-      if player.get('teamName') == @team1.get('name') or player.get('teamName') == @team2.get('name')
-        playerList.push(player)
-    playerList
+  combinedTeams: Ember.computed 'team1', 'team2', ->
+    t1 = @store.peekRecord('team', @team1.id)
+    t2 = @store.peekRecord('team', @team2.id)
+    playerList = t1.get('players').toArray()
+    t2p = t2.get('players').toArray()
+    return playerList.concat(t2p)
 
   actions:
-    addPlayer: ->
-      newPlayer = @store.createRecord('player', (
-        name: @.get('playerName'),
-        uid: @session.get('uid')
-      ))
-      newPlayer.save()
-      @set('playerName', "")
+    # addPlayer: ->
+    #   newPlayer = @store.createRecord('player', (
+    #     name: @.get('playerName'),
+    #     uid: @session.get('uid')
+    #   ))
+    #   newPlayer.save()
+    #   @set('playerName', "")
 
     generateHeats: ->
       #TODO This can probably be done with a nice functional solution
       console.log @get('combinedTeams.length')//@heatSize
       numHeats = @get('combinedTeams.length')//@heatSize
-      shuffledPlayers = _.shuffle(@get('combinedTeams').toArray())
+      shuffledPlayers = _.shuffle(@get('combinedTeams'))
       tempHeats = []
       for i in [0...numHeats]
         singleHeat = []
@@ -41,14 +41,14 @@ EventController = Ember.Controller.extend
       @set('heats', tempHeats)
 
     generateNumberOfHeats: ->
-      numHeatsPossible = @get('players').length//@heatSize
+      numHeatsPossible = @get('combinedTeams.length')//@heatSize
       console.log('numHeatsPossible: ' + numHeatsPossible)
       console.log('numOfHeats: ' + @numOfHeats)
       # Defaults to number of heats possible with the given heat size
       if numOfHeats < numHeatsPossible
         numOfHeats = numHeatsPossible
 
-      shuffledPlayers = _.shuffle(@.get('players'))
+      shuffledPlayers = _.shuffle(@get('combinedTeams'))
       tempHeats = []
       for i in [0...@numOfHeats]
         singleHeat = []

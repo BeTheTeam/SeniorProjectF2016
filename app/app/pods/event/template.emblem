@@ -1,24 +1,24 @@
-.player-container.section
-  .container
-    .heading.has-text-centered
-      h3 class="title is-3"
-        i.fa.fa-user
-        "Players
-    table class="table roster"
-      thead
-        tr
-          th Player Name
-          th
-      tbody
-        each players as |player|
-          tr.player.players
-            td = player.name
-            td.has-text-right
-        tr.new-player
-          td
-            = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" enter="addPlayer"
-          td.has-text-right
-            button.button.is-primary.add-player click="addPlayer" Add a player
+/ .player-container.section
+/   .container
+/     .heading.has-text-centered
+/       h3 class="title is-3"
+/         i.fa.fa-user
+/         "Players
+/     table class="table roster"
+/       thead
+/         tr
+/           th Player Name
+/           th
+/       tbody
+/         each players as |player|
+/           tr.player.players
+/             td = player.name
+/             td.has-text-right
+/         tr.new-player
+/           td
+/             = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" enter="addPlayer"
+/           td.has-text-right
+/             button.button.is-primary.add-player click="addPlayer" Add a player
 
 .heat-container.section
   .container
