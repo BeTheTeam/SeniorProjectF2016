@@ -3,14 +3,17 @@
 PlayerModel = User.extend
 
   only_player_thing: DS.attr('string')
-  team_memberships: DS.hasMany('teammembers')
+  teams: DS.hasMany('team', {embedded: 'always'})
 
   save: () ->
-    @_super().then((() ->
-      @store.createRecord('user', (
-        id: @id,
-        role: 'player'
-      )).save().then()
-    ).bind(@))
+    if @get('isNew')
+      @_super().then((() ->
+        @store.createRecord('user', (
+          id: @id,
+          role: 'player'
+        )).save().then()
+      ).bind(@))
+    else
+      @_super()
 
 `export default PlayerModel;`

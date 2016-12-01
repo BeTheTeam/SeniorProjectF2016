@@ -3,7 +3,7 @@
 TeamModel = DS.Model.extend
 
   name: DS.attr('string')
-  teamOwner: DS.belongsTo('coach')
-  teamMembers: DS.hasMany('teammembers')
+  coach: DS.belongsTo('coach')
+  players: DS.hasMany('player', {embedded: 'always'})
 
 `export default TeamModel;`

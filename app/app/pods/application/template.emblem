@@ -21,12 +21,7 @@
           = link-to "Events" "event" class="nav-item"
           = link-to "Teams" "teams" class="nav-item"
           span.nav-item
-            if (eq session.role "coach")
-              "Hey coach! How's the team?
-            if (eq session.role "player")
-              "Play your best today!
-          span.nav-item
-              session.email
+              "Welcome {{session.typed.name}}!
           span.nav-item
             = link-to "Logout" "logout" class="button"
 

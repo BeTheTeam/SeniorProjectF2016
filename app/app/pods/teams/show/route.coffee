@@ -3,7 +3,10 @@
 TeamsRoute = Ember.Route.extend
 
   model: (params) ->
-    team: @store.findRecord('team', params.team_id)
-    players: @store.findAll('player')
+    this_team = @store.findRecord('team', params.team_id)
+    return Ember.RSVP.hash({
+      team: this_team,
+      players: @store.findAll('player')
+    })
 
 `export default TeamsRoute;`
