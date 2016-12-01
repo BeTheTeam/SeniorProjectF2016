@@ -42,3 +42,8 @@ page-title
 
 .column.is-10.is-offset-1.p-a-0
   = outlet
+
+.container.has-text-centered
+  p
+    i
+      "2016 &copy; BeThe.Team, LLC
