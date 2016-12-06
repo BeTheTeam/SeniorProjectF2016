@@ -1,8 +1,9 @@
-`import DS from 'ember-data';`
+`import DS from 'ember-data'`
 
 TeamModel = DS.Model.extend
 
   name: DS.attr('string')
-  players: DS.hasMany('player')
+  coach: DS.belongsTo('coach')
+  players: DS.hasMany('player', {embedded: 'always'})
 
 `export default TeamModel;`

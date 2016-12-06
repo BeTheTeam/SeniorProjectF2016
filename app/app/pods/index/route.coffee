@@ -1,7 +1,10 @@
 `import Ember from 'ember'`
 
-HomeRoute = Ember.Route.extend
+IndexRoute = Ember.Route.extend
 
   model: ->
 
-`export default HomeRoute;`
+  beforeModel: ->
+    @set('store.page_title', 'Welcome to BeThe.Team!')
+
+`export default IndexRoute;`

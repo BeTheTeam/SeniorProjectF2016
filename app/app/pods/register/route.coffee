@@ -4,6 +4,9 @@
 RegisterRoute = Ember.Route.extend
 
   model: ->
-    roles: @store.findAll('role')
+    roles: ['Coach', 'Organizer', 'Scout', 'Player']
+
+  beforeModel: ->
+    @set('store.page_title', 'Register')
 
 `export default RegisterRoute;`

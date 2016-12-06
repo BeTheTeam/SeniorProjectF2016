@@ -1,3 +1,4 @@
+
 section.section
   section.teams-container.hero.is-info.is-bold
     .hero-body
@@ -39,6 +40,7 @@ section.section
             tbody
               each freePlayers as |player|
                 tr.player
-                  td = player.name
+                  td
+                    player.name
                   td.has-text-right.addPlayer
                     i.fa.fa-plus{action "addPlayer" player}
