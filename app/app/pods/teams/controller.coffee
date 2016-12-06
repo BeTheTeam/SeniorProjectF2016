@@ -1,7 +1,7 @@
 `import Ember from 'ember'`
 `import _ from 'lodash/lodash'`
 
-EventController = Ember.Controller.extend
+TeamsController = Ember.Controller.extend
 
   teams: Ember.computed.alias 'model.teams'
 
@@ -20,4 +20,4 @@ EventController = Ember.Controller.extend
       else
         #TODO: Show Error
 
-`export default EventController`
+`export default TeamsController`
