@@ -1,9 +1,4 @@
 section class="hero is-primary is-bold is-large"
-  .hero-body
-    .container.has-text-centered
-      h2 class="title is-2" Welcome to BeThe.Team
-      p
-        link-to class="button is-info is-large" "login" | Login!
 .columns
   .column
     p
