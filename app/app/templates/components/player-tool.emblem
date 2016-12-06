@@ -1,0 +1,6 @@
+span
+  link-to "players.show" player.id
+    = player.name
+  button.button.is-primary.is-pulled-right.is-small{action 'showStatModal' (concat 'sm-' player.id)} + Add Stat
+
+player-stat-modal player=player id=(concat 'sm-' player.id)

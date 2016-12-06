@@ -22,7 +22,8 @@ section.section
             tbody
               each model.team.players as |player|
                 tr.player
-                  td = player.name
+                  td
+                    player-tool player=player
                   td.has-text-right.removePlayer
                     i.fa.fa-close{action "removePlayer" player}
     .column

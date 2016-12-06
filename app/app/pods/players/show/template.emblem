@@ -1,0 +1,18 @@
+section.section
+  section.teams-container.hero.is-info.is-bold
+    .hero-body
+      .container.has-text-centered
+        h2 class="title is-2"
+          = model.player.name
+
+table.table
+  thead
+    tr
+      th Stat Type
+      th Stat Value
+  tbody
+    each model.player.stats as |stat|
+      td
+        stat.type
+      td
+        stat.statval

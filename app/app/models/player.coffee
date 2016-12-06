@@ -4,6 +4,7 @@ PlayerModel = User.extend
 
   only_player_thing: DS.attr('string')
   teams: DS.hasMany('team', {embedded: 'always'})
+  stats: DS.hasMany('stat', {embedded: 'always'})
 
   save: () ->
     if @get('isNew')
