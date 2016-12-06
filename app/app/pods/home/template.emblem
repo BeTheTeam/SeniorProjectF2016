@@ -1,0 +1,7 @@
+section class="hero is-primary"
+  .hero-body
+    .container.has-text-centered
+      h3 class="title is-3"
+        "Welcome to BeThe.Team!
+img src="/banners/0.png"
+= outlet

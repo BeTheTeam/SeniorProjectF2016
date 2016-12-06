@@ -1,28 +1,24 @@
-section class="hero is-primary is-bold"
-  .hero-body
-    .container.has-text-centered
-      h2 class="title is-2" Events
-.player-container.section
-  .container
-    .heading.has-text-centered
-      h3 class="title is-3"
-        i.fa.fa-user
-        "Players
-    table class="table roster"
-      thead
-        tr
-          th Player Name
-          th
-      tbody
-        each players as |player|
-          tr.player.players
-            td = player.name
-            td.has-text-right
-        tr.new-player
-          td
-            = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" enter="addPlayer"
-          td.has-text-right
-            button.button.is-primary.add-player click="addPlayer" Add a player
+/ .player-container.section
+/   .container
+/     .heading.has-text-centered
+/       h3 class="title is-3"
+/         i.fa.fa-user
+/         "Players
+/     table class="table roster"
+/       thead
+/         tr
+/           th Player Name
+/           th
+/       tbody
+/         each players as |player|
+/           tr.player.players
+/             td = player.name
+/             td.has-text-right
+/         tr.new-player
+/           td
+/             = input class="player-name-input input" type="text" value=playerName placeholder="Enter a player's name" enter="addPlayer"
+/           td.has-text-right
+/             button.button.is-primary.add-player click="addPlayer" Add a player
 
 .heat-container.section
   .container
@@ -30,6 +26,23 @@ section class="hero is-primary is-bold"
         h3 class="title is-3"
           i.fa.fa-fire
           "Heats
+        .columns
+          .column
+            = power-select [
+              options=teams
+              searchEnabled=false
+              onchange=(action (mut team1))
+              selected=team1
+            ] as |team|
+              = team.name
+          .column
+            = power-select [
+              options=teams
+              searchEnabled=false
+              onchange=(action (mut team2))
+              selected=team2
+            ] as |team|
+              = team.name
         .columns
           .column
             label.label Number of Players in a Heat

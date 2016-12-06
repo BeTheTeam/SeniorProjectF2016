@@ -39,3 +39,5 @@ section class="hero is-primary is-bold is-large"
 .columns
   .column
     = outlet
+img src="/banners/0.png"
+= outlet

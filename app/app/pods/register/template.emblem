@@ -1,0 +1,26 @@
+.register-container.section
+  .container
+    if errorMsgs
+      each errorMsgs as |error|
+        .notification.is-danger
+          error
+    if successMsg
+      .notification.is-success
+        "You have registered successfully!
+
+    label.label Role:
+    p.control
+      power-select options=roleOptions selected=registerRole searchEnabled=false onchange=(action (mut registerRole)) as |role|
+        role
+    label.label Name:
+    p.control
+      == input class="name-input input" type="text" value=registerName placeholder="John Doe" enter="newlineHook"
+    label.label Email:
+    p.control
+      == input class="email-input input" type="text" value=registerEmail placeholder="john.doe@example.com" enter="newlineHook"
+    label.label Password:
+    p.control
+      == input class="password-input input" type="password" value=registerPassword placeholder="******" enter="newlineHook"
+
+
+    button.button.is-primary{action 'register' 'password'} id="registerBtn" Sign Up!

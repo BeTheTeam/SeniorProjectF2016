@@ -1,0 +1,51 @@
+.nav.nav
+  .column.is-10.is-offset-1.p-a-0
+    .nav
+      .nav-left
+        = link-to "index" class="nav-item is-brand"
+          h1.title.is-3 id="title"
+            img src="/logo.png"
+
+      if session.uid
+        span.nav-toggle
+          = link-to "Home" "index" class="nav-item"
+          = link-to "Events" "event" class="nav-item"
+          if isCoach
+            = link-to "Teams" "teams" class="nav-item"
+          span.nav-item
+              session.email
+          span.nav-item
+            = link-to "Logout" "logout" class="button"
+
+        .nav-right.nav-menu
+          = link-to "Home" "index" class="nav-item"
+          = link-to "Events" "event" class="nav-item"
+          if isCoach
+            = link-to "Teams" "teams" class="nav-item"
+          span.nav-item
+              "Welcome {{session.typed.name}}!
+          span.nav-item
+            = link-to "Logout" "logout" class="button"
+
+      else
+        span.nav-toggle
+          = link-to "Info" "index" class="nav-item"
+          span.nav-item
+            = link-to "Register" "register" class="button is-primary"
+            = link-to "Login" "login" class="button"
+
+        .nav-right.nav-menu
+          = link-to "Info" "index" class="nav-item"
+          span.nav-item
+            = link-to "Register" "register" class="button is-primary"
+            = link-to "Login" "login" class="button"
+
+page-title
+
+.column.is-10.is-offset-1.p-a-0
+  = outlet
+
+.container.has-text-centered style="margin-top: 20px"
+  p
+    i
+      "2016 &copy; BeThe.Team, LLC
