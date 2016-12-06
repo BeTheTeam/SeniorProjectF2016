@@ -5,6 +5,9 @@ section.section
         h2 class="title is-2"
           = model.player.name
 
+section.section
+  ember-chart type='line' data=model.time_chart_stats options=model.axis_labels id="time-stats-chart" width=200 height=200
+  / time_chart_stats
 table.table
   thead
     tr
@@ -12,7 +15,8 @@ table.table
       th Stat Value
   tbody
     each model.player.stats as |stat|
-      td
-        stat.type
-      td
-        stat.statval
+      tr
+        td
+          stat.stattype
+        td
+          stat.statval

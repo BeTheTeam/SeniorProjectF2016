@@ -22,6 +22,7 @@ module.exports = function(defaults) {
 
   app.import('bower_components/lodash/lodash.js');
   app.import('bower_components/bulma/css/bulma.css');
+  app.import('bower_components/randomcolor/randomColor.js');
 
   return app.toTree();
 };

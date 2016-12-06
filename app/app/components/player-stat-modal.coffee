@@ -1,7 +1,7 @@
 `import Ember from 'ember';`
 
 PlayerStatModalComponent = Ember.Component.extend
-  statTypeOptions: ['60 m','100 m','200 m','400 m','800 m','1500 m','3000 m','5000 m','10,000 m','Long jump','Triple jump','High jump','Pole vault','Shot put','Discus throw','Hammer throw','Javelin throw']
+  statTypeOptions: ['60 m','100 m','200 m','400 m','Long jump','High jump','Pole vault','Shot put','Discus throw']
 
   store: Ember.inject.service()
 
@@ -9,7 +9,7 @@ PlayerStatModalComponent = Ember.Component.extend
       app_controller = @get('targetObject')
       exposedName = "comp-" + @get('id')
       app_controller.set(exposedName, @)
-    ).on('init'),
+    ).on('init')
 
   actions:
     toggleModal: ->
@@ -22,7 +22,7 @@ PlayerStatModalComponent = Ember.Component.extend
       store = @.get('store')
       this_player = @get('player')
       newSI = {
-        type: st
+        stattype: st
         statval: parseFloat(@get('newStatValue').replace(/[^0-9.,]/g,''))
         player: this_player
       }
