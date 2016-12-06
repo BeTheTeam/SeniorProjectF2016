@@ -12,78 +12,78 @@ describe "Integration: EventPage", ->
       @page.addPlayer()
 
 
-  beforeEach ->
-    @timeout 10000
-    @loginPage.visit()
-    @loginPage.enterEmail('test@bethe.team')
-    @loginPage.enterPassword('testPassw0rd')
-    @loginPage.login()
+  # beforeEach ->
+  #   @timeout 10000
+  #   @loginPage.visit()
+  #   @loginPage.enterEmail('test@bethe.team')
+  #   @loginPage.enterPassword('testPassw0rd')
+  #   @loginPage.login()
 
-    andThen =>
-      @store.findAll('player').then((players) ->
-        players.forEach((player) ->
-          player.destroyRecord()
-          player.save()
-        )
-      )
+  #   andThen =>
+  #     @store.findAll('player').then((players) ->
+  #       players.forEach((player) ->
+  #         player.destroyRecord()
+  #         player.save()
+  #       )
+  #     )
 
-      @page.visit()
-
-
-  afterEach ->
-    @loginPage.visit()
-    @loginPage.logout()
+  #     @page.visit()
 
 
-  describe "adding players", ->
-    it "can add a new player", ->
-      expect(@page.players().toArray().length).to.equal 0
-
-      @addPlayer("derp")
-
-      andThen =>
-        expect(@page.players().toArray().length).to.equal 1
-        expect(@page.playerInputValue).to.equal ""
+  # afterEach ->
+  #   @loginPage.visit()
+  #   @loginPage.logout()
 
 
-  describe "adding heats", ->
-    it "can generate basic heats", ->
-      console.log(@page.heats().toArray().length)
-      expect(@page.heats().toArray().length).to.equal 0
+  # describe "adding players", ->
+  #   it "can add a new player", ->
+  #     expect(@page.players().toArray().length).to.equal 0
 
-      for i in [1..6]
-        @addPlayer("derp#{i}")
+  #     @addPlayer("derp")
 
-      @page.generateHeats()
-
-      andThen =>
-        expect(@page.heats().toArray().length).to.equal 2
-        expect(@page.heatsPlayers().toArray().length).to.equal 6
-        #TODO Expect unique players for the heats
+  #     andThen =>
+  #       expect(@page.players().toArray().length).to.equal 1
+  #       expect(@page.playerInputValue).to.equal ""
 
 
-  describe "dynamic number of players per heat", ->
-    it "changes number of players per heat", ->
-      expect(@page.heats().toArray().length).to.equal 0
+  # describe "adding heats", ->
+  #   it "can generate basic heats", ->
+  #     console.log(@page.heats().toArray().length)
+  #     expect(@page.heats().toArray().length).to.equal 0
 
-      @page.setHeatSize(2)
+  #     for i in [1..6]
+  #       @addPlayer("derp#{i}")
 
-      for i in [1..6]
-        @addPlayer("derp#{i}")
+  #     @page.generateHeats()
 
-      @page.generateHeats()
-
-      andThen =>
-        expect(@page.heats().toArray().length).to.equal 3
-        expect(@page.heatsPlayers().toArray().length).to.equal 6
+  #     andThen =>
+  #       expect(@page.heats().toArray().length).to.equal 2
+  #       expect(@page.heatsPlayers().toArray().length).to.equal 6
+  #       #TODO Expect unique players for the heats
 
 
-  describe "dynamic number of heats", ->
-    it "generates a specified number of heats", ->
-      expect(@page.heats().toArray().length).to.equal 0
+  # describe "dynamic number of players per heat", ->
+  #   it "changes number of players per heat", ->
+  #     expect(@page.heats().toArray().length).to.equal 0
 
-      @page.setNumberOfHeats(2)
-      @page.generateNumberOfHeats()
+  #     @page.setHeatSize(2)
 
-      andThen =>
-        expect(@page.heats().toArray().length).to.equal 2
+  #     for i in [1..6]
+  #       @addPlayer("derp#{i}")
+
+  #     @page.generateHeats()
+
+  #     andThen =>
+  #       expect(@page.heats().toArray().length).to.equal 3
+  #       expect(@page.heatsPlayers().toArray().length).to.equal 6
+
+
+  # describe "dynamic number of heats", ->
+  #   it "generates a specified number of heats", ->
+  #     expect(@page.heats().toArray().length).to.equal 0
+
+  #     @page.setNumberOfHeats(2)
+  #     @page.generateNumberOfHeats()
+
+  #     andThen =>
+  #       expect(@page.heats().toArray().length).to.equal 2
