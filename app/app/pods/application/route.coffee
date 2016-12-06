@@ -6,7 +6,7 @@ AppRoute = Ember.Route.extend
   storage: Ember.inject.service()
 
   setupController: (c, m) ->
-    c.set('isCoach', Ember.computed 'session', ->
+    c.set('isCoach', Ember.computed 'session.role', ->
       @get('session.role') == 'coach'
     )
 
