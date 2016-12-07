@@ -22,25 +22,29 @@ section.section
             tbody
               each model.team.players as |player|
                 tr.player
-                  td = player.name
-                  td.has-text-right.removePlayer
-                    i.fa.fa-close{action "removePlayer" player}
-    .column
-      .freePlayers.section
-        .container
-          .heading.has-text-centered
-            h5.title.is-5
-              i.fa.fa-user
-              "Free Players
-          table.table
-            thead
-              tr
-                th Player Name
-                th
-            tbody
-              each freePlayers as |player|
-                tr.player
                   td
-                    player.name
-                  td.has-text-right.addPlayer
-                    i.fa.fa-plus{action "addPlayer" player}
+                    player-tool player=player
+                  if model.canEdit
+                    td.has-text-right.removePlayer
+                      i.fa.fa-close{action "removePlayer" player}
+    if model.canEdit
+      .column
+        .freePlayers.section
+          .container
+            .heading.has-text-centered
+              h5.title.is-5
+                i.fa.fa-user
+                "Free Players
+            table.table
+              thead
+                tr
+                  th Player Name
+                  th
+              tbody
+                each freePlayers as |player|
+                  tr.player
+                    td
+                      player.name
+                    td.has-text-right.addPlayer
+                      if model.canEdit
+                        i.fa.fa-plus{action "addPlayer" player}

@@ -1,0 +1,29 @@
+=if enabled
+  .modal.is-active id="sm-{{player.id}}"
+    .modal-background
+    .modal-card
+      header.modal-card-head
+        p.modal-card-title
+          "Add Stat for {{player.name}}
+      section.modal-card-body
+        table.table
+          thead
+            tr
+              th Stat Type
+              th Value
+          tbody
+            tr
+              td
+                p.control
+                  span.select
+                    select onchange={ action (mut newStatType) value="target.value" }
+                      each statTypeOptions as |st|
+                        option
+                          st
+              td
+                p.control
+                  = input class="name-input input" type="text" value=newStatValue placeholder="10s / 15ft"
+      footer.modal-card-foot
+        button.button.is-primary{action 'recordStat' } Save
+        button.button{action 'toggleModal' } Cancel
+    button.modal-close{action 'toggleModal' }
