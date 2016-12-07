@@ -15,5 +15,7 @@ Router.map ->
   @route 'home'
   @route 'logout'
   @route 'teams'
+  @route 'players', ->
+    @route 'show', {path: '/:player_id'}
 
 `export default Router;`

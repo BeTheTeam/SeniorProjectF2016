@@ -9,9 +9,9 @@
       if session.uid
         span.nav-toggle
           = link-to "Home" "index" class="nav-item"
-          = link-to "Events" "event" class="nav-item"
           if isCoach
-            = link-to "Teams" "teams" class="nav-item"
+            = link-to "Events" "event" class="nav-item"
+          = link-to "Teams" "teams" class="nav-item"
           span.nav-item
               session.email
           span.nav-item
@@ -19,9 +19,9 @@
 
         .nav-right.nav-menu
           = link-to "Home" "index" class="nav-item"
-          = link-to "Events" "event" class="nav-item"
           if isCoach
-            = link-to "Teams" "teams" class="nav-item"
+            = link-to "Events" "event" class="nav-item"
+          = link-to "Teams" "teams" class="nav-item"
           span.nav-item
               "Welcome {{session.typed.name}}!
           span.nav-item

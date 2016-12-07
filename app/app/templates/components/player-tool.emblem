@@ -1,0 +1,15 @@
+
+if (eq wrap_el "h2")
+  h2 class=wrap_class
+    = player.name
+    if canAddStat.isFulfilled
+      if canAddStat.isThisCoach
+        button.button.is-primary.is-pulled-right.is-small{action 'showStatModal' (concat 'sm-' player.id)} + Add Stat
+else
+  span class=wrap_class
+    link-to "players.show" player.id
+      = player.name
+      if canAddStat.isFulfilled
+        if canAddStat.isThisCoach
+          button.button.is-primary.is-pulled-right.is-small{action 'showStatModal' (concat 'sm-' player.id)} + Add Stat
+player-stat-modal player=player id=(concat 'sm-' player.id)

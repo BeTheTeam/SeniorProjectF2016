@@ -1,0 +1,28 @@
+section.section
+  section.teams-container.hero.is-info.is-bold
+    .hero-body
+      .container.has-text-centered
+        player-tool player=model.player wrap_class="title is-2" wrap_el="h2"
+
+section.section
+  .columns
+    .column
+      h3.title.is-3.has-text-centered Time Results
+      ember-chart type='line' data=model.time_chart_stats options=model.time_chart_labels id="time-stats-chart" width=200 height=200
+    .column
+      h3.title.is-3.has-text-centered Distance Results
+      ember-chart type='line' data=model.dist_chart_stats options=model.dist_chart_labels id="dist-stats-chart" width=200 height=200
+  / time_chart_stats
+table.table
+  thead
+    tr
+      th Event
+      th Event Result
+  tbody
+    each model.player.stats as |stat|
+      tr
+        td
+          stat.stattype
+        td
+          stat.statval
+          stat.stat_unit
