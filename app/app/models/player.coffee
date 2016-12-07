@@ -6,16 +6,54 @@ PlayerModel = User.extend
   teams: DS.hasMany('team', {embedded: 'always'})
   stats: DS.hasMany('stat', {embedded: 'always'})
 
-  time_chart_stats: Ember.computed(() ->
+  coaches: Ember.computed('teams', () ->
+    return @get('teams').then(((teams) ->
+      return teams.map((t) -> t.get('coach.content')).filter((i,p,s) ->
+        return s.indexOf(i) == p)
+      ).bind(@))
+  )
+  chart_data_series: Ember.computed('stats', () ->
+    return @get('stats').then(((stats)->
+        is_dist_series_data = (stat) ->
+          (['Long jump','High jump','Pole vault','Shot put','Discus throw'].indexOf(stat.get('stattype')) > -1)
+        is_time_series_data = (stat) ->
+          (['60 m','100 m','200 m','400 m'].indexOf(stat.get('stattype')) > -1)
+        stat_series_type = (stat) ->
+          is_time_series_data(stat) && 'time_based' || is_dist_series_data && 'dist_based' || 'unbased'
+
+        organized_data_series = {
+          time_based: {
+            max_records: 0,
+            series: {}
+          }
+          dist_based: {
+            max_records: 0,
+            series: {}
+          }
+          unbased: {
+            series: {}
+          }
+        }
+
+        stats.forEach((stat) ->
+          sst = stat_series_type(stat)
+          st = stat.get('stattype')
+          if organized_data_series[sst].series[st] == undefined
+            organized_data_series[sst].series[st] = []
+          organized_data_series[sst].series[st] = organized_data_series[sst].series[st].concat(stat.get('statval'))
+          organized_data_series[sst].series[st].length > organized_data_series[sst].max_records && organized_data_series[sst].max_records = organized_data_series[sst].series[st].length
+        )
+
+        return organized_data_series
+      ).bind(@))
+  )
+
+  dist_chart_stats: Ember.computed(() ->
     return @get('stats').then(((s)->
         time_series_data = s.filter((s)->
           (['60 m','100 m','200 m','400 m'].indexOf(s.get('stattype')) > -1)
         )
-        console.log(time_series_data)
-        @set('time_series_data_sorted',{
-          labels: ['hey'],
-          datasets: [20]
-        })
+
         largest_series = 0
         time_series_data_sorted = {}
 
@@ -27,8 +65,6 @@ PlayerModel = User.extend
           if time_series_data_sorted[s.get('stattype')].length > largest_series
             largest_series = time_series_data_sorted[s.get('stattype')].length
         )
-        console.log("sorted here");
-        console.log(time_series_data_sorted)
 
         prep_to_go = []
 
@@ -41,10 +77,6 @@ PlayerModel = User.extend
             fill: false
             })
           console.log(prep_to_go)
-        # time_series_data_sorted.forEach((sn,sv) ->
-        #   console.log(sn);
-        #   console.log(sv);
-        # )
         return {
           labels: Array.apply(null, {length: largest_series}).map((v, i, a) -> a[i]=i+1),
           datasets: prep_to_go

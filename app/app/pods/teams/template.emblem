@@ -1,22 +1,40 @@
-table.table.roster
-  thead
-    tr
-      th Team Name
-      th
-  tbody
-    each teams as |team|
-      tr.teams.team
-        td
-          link-to "teams.show" team.id
-            = team.name
-        td.has-text-right
+if (or model.my_teams (eq model.my_teams.length 0))
+  section.section
+    h3.title.is-3 My Teams
+    table.table.roster
+      thead
+        tr
+          th Team Name
+          th
+      tbody
+        each model.my_teams as |team|
+          tr.teams.team
+            td
+              link-to "teams.show" team.id
+                = team.name
+            td.has-text-right
 
-    if (eq session.role "coach")
-      tr.new-player
-        td
-          = input class="team-name-input input" type="text" value=teamName placeholder="Enter a Team's name" enter="createTeam"
-        td.has-text-right
-          button.button.is-primary.add-team click="createTeam" Add a Team
+        if (eq session.role "coach")
+          tr.new-player
+            td
+              = input class="team-name-input input" type="text" value=teamName placeholder="Enter a Team's name" enter="createTeam"
+            td.has-text-right
+              button.button.is-primary.add-team click="createTeam" Add a Team
+
+section.section
+  h3.title.is-3 All Teams
+  table.table.roster
+    thead
+      tr
+        th Team Name
+        th
+    tbody
+      each model.teams as |team|
+        tr.teams.team
+          td
+            link-to "teams.show" team.id
+              = team.name
+          td.has-text-right
 
 .team-details
   =outlet
