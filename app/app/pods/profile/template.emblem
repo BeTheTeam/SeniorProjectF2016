@@ -1,0 +1,13 @@
+.profile
+  .tile
+    .tile.is-vertical
+      .title Name
+      p = session.typed.name
+      .title Role
+      p = session.role
+    .tile.is-vertical
+      .figure.image.is-square
+        img src=profile_image_url
+      .title Description
+      p = profile_description
+

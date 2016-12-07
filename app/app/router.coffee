@@ -15,5 +15,6 @@ Router.map ->
   @route 'home'
   @route 'logout'
   @route 'teams'
+  @route 'profile'
 
 `export default Router;`
