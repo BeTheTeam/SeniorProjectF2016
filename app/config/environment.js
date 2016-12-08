@@ -32,7 +32,7 @@ module.exports = function(environment) {
   };
 
   if (environment === 'development') {
-    ENV.APP.LOG_RESOLVER = true;
+/*    ENV.APP.LOG_RESOLVER = true;
     ENV.APP.LOG_ACTIVE_GENERATION = true;
     ENV.APP.LOG_TRANSITIONS = true;
     ENV.APP.LOG_TRANSITIONS_INTERNAL = true;
@@ -44,7 +44,7 @@ module.exports = function(environment) {
     ENV.firebase.messagingSenderId = process.env.BTT_TEST_FB_MESSAGINGSENDERID;
     ENV.torii = {
       sessionServiceName: 'session'
-    };
+    };*/
   }
 
   if (environment === 'test') {
