@@ -4,7 +4,7 @@ if (eq wrap_el "h2")
     = player.name
     if canAddStat.isFulfilled
       if canAddStat.isThisCoach
-        button.button.is-primary.is-pulled-right.is-small{action 'showStatModal' (concat 'sm-' player.id)} + Add Stat
+        button.button.is-primary.is-large.is-pulled-right.btn-add-stat{action 'showStatModal' (concat 'sm-' player.id)} + Add Stat
 else
   span class=wrap_class
     link-to "players.show" player.id
